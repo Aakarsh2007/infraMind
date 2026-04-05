@@ -45,6 +45,10 @@ openai_client = OpenAI(
 )
 http = httpx.Client(base_url=API_BASE_URL, timeout=60.0)
 
+# Timeout guard — ensures inference never runs > 18 min total
+INFERENCE_START = time.time()
+MAX_TOTAL_SECONDS = 18 * 60  # 18 min hard cap (leaves 2 min buffer)
+
 # ── Environment helpers ───────────────────────────────────────────────────────
 def env_reset(task_id: str) -> Dict[str, Any]:
     r = http.post("/reset", json={"task_id": task_id, "model": MODEL_NAME, "seed": INFERENCE_SEED})
@@ -146,6 +150,10 @@ def run_task(task_id: str) -> Dict[str, Any]:
     episode_start = time.time()
 
     while not done and step < MAX_STEPS_PER_TASK:
+        # Global timeout guard
+        if time.time() - INFERENCE_START > MAX_TOTAL_SECONDS:
+            print(f'[STEP] {{"step": {step}, "action": "timeout_guard", "observation": "global_timeout", "reward": null, "done": false}}', flush=True)
+            break
         step += 1
         t0 = time.time()
 

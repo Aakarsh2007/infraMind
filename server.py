@@ -79,6 +79,11 @@ async def reset(req: ResetRequest):
     except Exception as e:
         raise HTTPException(500, str(e))
 
+# GET convenience endpoint — reset?task_id=memory_leak&seed=42
+@app.get("/reset", tags=["OpenEnv"], summary="GET reset — browser-friendly")
+async def reset_get(task_id: str = "memory_leak", seed: Optional[int] = None):
+    return await reset(ResetRequest(task_id=task_id, seed=seed))
+
 
 @app.post("/step", tags=["OpenEnv"], summary="Execute one action")
 async def step(req: StepRequest):
