@@ -1,8 +1,8 @@
 """
-Gravex-Aegis Baseline Inference Script
+InfraMind Baseline Inference Script
 OpenEnv Hackathon — Round 1 compliant.
 
-Mandatory format (DO NOT CHANGE field names or order):
+Mandatory format:
   [START] {"task_id": "...", "model": "..."}
   [STEP]  {"step": N, "action": "...", "observation": "...", "reward": R, "done": false}
   [END]   {"task_id": "...", "reward": R, "steps": N, "status": "success"}
@@ -10,6 +10,7 @@ Mandatory format (DO NOT CHANGE field names or order):
 Reads: API_BASE_URL, MODEL_NAME, HF_TOKEN, OPENAI_API_KEY from environment.
 Uses: OpenAI client for all LLM calls.
 Runtime: < 20 min on 2vCPU / 8GB RAM.
+Reproducible: set INFERENCE_SEED env var for deterministic runs.
 """
 from __future__ import annotations
 
@@ -35,7 +36,8 @@ TASK_IDS: List[str] = (
     if os.environ.get("FULL_RUN") == "1"
     else ["memory_leak", "db_deadlock", "cascade_failure"]
 )
-MAX_STEPS_PER_TASK = 25  # hard cap — well within 20min total
+MAX_STEPS_PER_TASK = 25
+INFERENCE_SEED = int(os.environ.get("INFERENCE_SEED", "42"))  # Reproducible seed
 
 # ── Clients ───────────────────────────────────────────────────────────────────
 openai_client = OpenAI(
@@ -45,7 +47,7 @@ http = httpx.Client(base_url=API_BASE_URL, timeout=60.0)
 
 # ── Environment helpers ───────────────────────────────────────────────────────
 def env_reset(task_id: str) -> Dict[str, Any]:
-    r = http.post("/reset", json={"task_id": task_id, "model": MODEL_NAME})
+    r = http.post("/reset", json={"task_id": task_id, "model": MODEL_NAME, "seed": INFERENCE_SEED})
     r.raise_for_status()
     return r.json()
 
@@ -215,8 +217,8 @@ def run_task(task_id: str) -> Dict[str, Any]:
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 def main() -> None:
-    print(f"Gravex-Aegis Baseline Inference", flush=True)
-    print(f"API_BASE_URL={API_BASE_URL}  MODEL={MODEL_NAME}  TASKS={TASK_IDS}", flush=True)
+    print(f"InfraMind Baseline Inference", flush=True)
+    print(f"API_BASE_URL={API_BASE_URL}  MODEL={MODEL_NAME}  SEED={INFERENCE_SEED}  TASKS={TASK_IDS}", flush=True)
 
     # Verify environment is reachable
     try:
