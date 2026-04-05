@@ -20,10 +20,10 @@ class MemoryLeakScenario(BaseScenario):
         12: [NoiseEvent(source="slack_alert", content="Marketing: 'Can we push the new feature today?'")],
     }
 
-    def __init__(self, difficulty: float = 1.0) -> None:
-        super().__init__(difficulty)
-        # Pick a random variant each episode
-        self._variant = random.choice(MEMORY_LEAK_VARIANTS)
+    def __init__(self, difficulty: float = 1.0, seed: Optional[int] = None) -> None:
+        super().__init__(difficulty, seed)
+        # Pick a random variant using seeded RNG — reproducible per seed
+        self._variant = self._rng.choice(MEMORY_LEAK_VARIANTS)
 
     def initial_files(self) -> Dict[str, str]:
         files = {

@@ -20,9 +20,9 @@ class DbDeadlockScenario(BaseScenario):
         18: [NoiseEvent(source="twitter", content="Users reporting payment failures. #BankingApp #down")],
     }
 
-    def __init__(self, difficulty: float = 1.0) -> None:
-        super().__init__(difficulty)
-        self._variant = random.choice(DB_DEADLOCK_VARIANTS)
+    def __init__(self, difficulty: float = 1.0, seed: Optional[int] = None) -> None:
+        super().__init__(difficulty, seed)
+        self._variant = self._rng.choice(DB_DEADLOCK_VARIANTS)
 
     def initial_files(self) -> Dict[str, str]:
         files = {

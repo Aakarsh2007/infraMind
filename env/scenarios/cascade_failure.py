@@ -23,9 +23,9 @@ class CascadeFailureScenario(BaseScenario):
         20: [NoiseEvent(source="email", content="Infra team: 'We scaled up Service B — still failing'")],
     }
 
-    def __init__(self, difficulty: float = 1.0) -> None:
-        super().__init__(difficulty)
-        self._variant = random.choice(CASCADE_VARIANTS)
+    def __init__(self, difficulty: float = 1.0, seed: Optional[int] = None) -> None:
+        super().__init__(difficulty, seed)
+        self._variant = self._rng.choice(CASCADE_VARIANTS)
 
     def initial_files(self) -> Dict[str, str]:
         files = {
