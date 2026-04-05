@@ -1,7 +1,7 @@
 ---
 title: InfraMind Autonomous DevOps Benchmark
 emoji: 🧠
-colorFrom: orange
+colorFrom: red
 colorTo: purple
 sdk: docker
 pinned: true
@@ -42,36 +42,33 @@ tags:
 **Option 1 — Browser:** Open the Space URL and click "Run Judge Evaluation"
 
 **Option 2 — curl:**
-```bash
-curl -X POST https://your-space.hf.space/judge/run_all \
-  -H "Content-Type: application/json" \
-  -d '{"seed": 42}'
-```
+
+    curl -X POST https://your-space.hf.space/judge/run_all \
+      -H "Content-Type: application/json" \
+      -d '{"seed": 42}'
 
 **Option 3 — GET (browser-friendly):**
-```
-https://your-space.hf.space/judge/run_all?seed=42
-```
+
+    https://your-space.hf.space/judge/run_all?seed=42
 
 **Expected output:**
-```json
-{
-  "avg_score": 0.62,
-  "verdict": "⚠️ Partial Success — Agent fixed some issues but missed root causes in harder tasks",
-  "highlights": [
-    "✅ memory_leak: Correctly fixed (score=0.75)",
-    "⚠️ db_deadlock: Partial fix (score=0.62)",
-    "❌ cascade_failure: Failed to fix (score=0.41)"
-  ],
-  "proof_of_fix": {
-    "error_rate": "0.72 → 0.02 ✅ (96% reduction)",
-    "latency_ms": "4200ms → 120ms ✅ (97% reduction)",
-    "cpu_percent": "82% → 35% ✅ (57% reduction)"
-  },
-  "seed": 42,
-  "reproducible": true
-}
-```
+
+    {
+      "avg_score": 0.62,
+      "verdict": "⚠️ Partial Success — Agent fixed some issues but missed root causes in harder tasks",
+      "highlights": [
+        "✅ memory_leak: Correctly fixed (score=0.75)",
+        "⚠️ db_deadlock: Partial fix (score=0.62)",
+        "❌ cascade_failure: Failed to fix (score=0.41)"
+      ],
+      "proof_of_fix": {
+        "error_rate": "0.72 → 0.02 ✅ (96% reduction)",
+        "latency_ms": "4200ms → 120ms ✅ (97% reduction)",
+        "cpu_percent": "82% → 35% ✅ (57% reduction)"
+      },
+      "seed": 42,
+      "reproducible": true
+    }
 
 ---
 
@@ -80,11 +77,12 @@ https://your-space.hf.space/judge/run_all?seed=42
 InfraMind is an **adaptive evaluation benchmark** for autonomous AI engineering systems — measuring not only outcomes but **reasoning, coordination, and resilience under uncertainty**.
 
 An AI agent is dropped into an actively degrading production backend. It must:
-- Read streaming telemetry under time pressure
-- Filter adversarial hints (wrong advice injected to test reasoning)
-- Coordinate between specialized sub-agents
-- Write a working code patch before the system crashes
-- Be scored on **7 dimensions** — not just "did it fix the bug"
+
+* Read streaming telemetry under time pressure
+* Filter adversarial hints (wrong advice injected to test reasoning)
+* Coordinate between specialized sub-agents
+* Write a working code patch before the system crashes
+* Be scored on **7 dimensions** — not just "did it fix the bug"
 
 > *"This is not a game. This is a benchmark for autonomous AI engineering teams."*
 
@@ -92,12 +90,12 @@ An AI agent is dropped into an actively degrading production backend. It must:
 
 ## 🆚 Why InfraMind vs existing benchmarks?
 
-| Benchmark | Domain | Multi-Agent | Adversarial | Dynamic | Real-time |
-|-----------|--------|-------------|-------------|---------|-----------|
-| SWE-bench | Code repair | ❌ | ❌ | ❌ | ❌ |
-| ToolBench | Tool usage | ❌ | ❌ | ❌ | ❌ |
-| AgentBench | General tasks | ❌ | ❌ | ❌ | ❌ |
-| **InfraMind** | **DevOps SRE** | **✅** | **✅** | **✅** | **✅** |
+| Benchmark     | Domain         | Multi-Agent | Adversarial | Dynamic | Real-time |
+| ------------- | -------------- | ----------- | ----------- | ------- | --------- |
+| SWE-bench     | Code repair    | ❌           | ❌           | ❌       | ❌         |
+| ToolBench     | Tool usage     | ❌           | ❌           | ❌       | ❌         |
+| AgentBench    | General tasks  | ❌           | ❌           | ❌       | ❌         |
+| **InfraMind** | **DevOps SRE** | **✅**       | **✅**       | **✅**   | **✅**     |
 
 ---
 
@@ -105,13 +103,13 @@ An AI agent is dropped into an actively degrading production backend. It must:
 
 When an agent submits a correct patch, the system metrics actually improve:
 
-| Metric | Before | After | Change |
-|--------|--------|-------|--------|
-| Error Rate | 0.72 | 0.02 | ✅ 96% reduction |
-| Latency | 4200ms | 120ms | ✅ 97% reduction |
-| CPU | 82% | 35% | ✅ 57% reduction |
-| Root Cause | Redis timeout | Fixed | ✅ Identified |
-| Fix Confidence | — | 0.87 | ✅ High |
+| Metric         | Before        | After | Change           |
+| -------------- | ------------- | ----- | ---------------- |
+| Error Rate     | 0.72          | 0.02  | ✅ 96% reduction  |
+| Latency        | 4200ms        | 120ms | ✅ 97% reduction  |
+| CPU            | 82%           | 35%   | ✅ 57% reduction  |
+| Root Cause     | Redis timeout | Fixed | ✅ Identified     |
+| Fix Confidence | —             | 0.87  | ✅ High           |
 
 *Metrics only improve when the agent submits a correct patch — not on restart or rollback.*
 
@@ -119,321 +117,138 @@ When an agent submits a correct patch, the system metrics actually improve:
 
 ## 🏗️ Architecture
 
-```
-┌──────────────────────────────────────────────────────────────────────┐
-│                         InfraMind                                    │
-│                                                                      │
-│  ┌──────────────────────────┐  ┌─────────────────────────────────┐  │
-│  │   INCIDENT ENGINE         │  │    MULTI-AGENT WORKSPACE        │  │
-│  │                          │  │                                 │  │
-│  │  • Seeded Chaos Generator │  │  • 5 Agent Personas             │  │
-│  │  • War-Room Clock         │  │  • Agent Memory System          │  │
-│  │  • Butterfly Effect       │  │  • Dynamic Difficulty           │  │
-│  │  • Signal vs Noise        │  │  • Feedback Learning            │  │
-│  │  • Adversarial Agent      │  │  • Agent Communication          │  │
-│  │  • Hidden Test Grader     │  │  • Episode Trace Export         │  │
-│  │  • Before/After Metrics   │  │  • Skill Breakdown              │  │
-│  └──────────────────────────┘  └─────────────────────────────────┘  │
-│                                                                      │
-│  ┌──────────────────────────────────────────────────────────────┐   │
-│  │                    OpenEnv Interface                          │   │
-│  │  /reset  /step  /state  /tasks  /judge/run_all  /export      │   │
-│  └──────────────────────────────────────────────────────────────┘   │
-└──────────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## ✨ Feature Matrix
-
-| Feature | Status | Description |
-|---------|--------|-------------|
-| OpenEnv spec compliance | ✅ | Full step/reset/state, typed Pydantic models, openenv.yaml |
-| 5 real-world tasks | ✅ | Memory leak → Auth bypass, easy to hard |
-| 9 randomized variants | ✅ | Seeded — same seed = same variant, different seed = different bug |
-| Deterministic grading | ✅ | Same patch always gets same score |
-| Partial reward signals | ✅ | 7 reward components, not just binary |
-| Before/after metric scoring | ✅ | Proves the fix actually improved the system |
-| Root cause attribution | ✅ | Keyword-based scoring of patch_description |
-| Adversarial agent | ✅ | Wrong hints injected — tests reasoning under uncertainty |
-| Butterfly effect | ✅ | Band-aid fixes cause worse cascade 5 steps later |
-| Signal vs. noise | ✅ | Customer tickets, Twitter, Slack injected as distractors |
-| Agent memory | ✅ | Remembers past fixes across episodes |
-| Dynamic difficulty | ✅ | Adapts to agent performance history |
-| Feedback learning | ✅ | Human ratings adjust reward weights |
-| Judge mode | ✅ | `POST /judge/run_all` — instant evaluation for judges |
-| Episode trace export | ✅ | `GET /export/{run_id}` — full trace for RL training |
-| Skill breakdown | ✅ | Per-skill scores: root cause, debugging, patch quality, etc. |
-| Failure analysis report | ✅ | Wrong actions, optimal path, causal link |
-| Live AI agent | ✅ | User pastes API key, watches AI solve live via SSE |
-| Model comparison | ✅ | Race two models on same task simultaneously |
-| War Room view | ✅ | Multi-agent coordination visualized as live message feed |
-| Custom scenario builder | ✅ | Paste your own buggy code → playable episode |
-| Replay mode | ✅ | Browse and replay any past episode |
-| Leaderboard | ✅ | Global rankings with skill breakdown |
-| WebSocket live feed | ✅ | Real-time metrics streaming |
-| Concurrent sessions | ✅ | Stateless API — unlimited parallel runs |
-| Docker ready | ✅ | `docker build && docker run` works |
-| HF Spaces ready | ✅ | Port 7860, health check, openenv tag |
+    InfraMind System
+     ├ Incident Engine
+     │   ├ Seeded Chaos Generator
+     │   ├ War-Room Clock
+     │   ├ Adversarial Agent
+     │   ├ Hidden Test Grader
+     │   └ Before/After Metrics
+     │
+     ├ Multi-Agent Workspace
+     │   ├ 5 Agent Personas
+     │   ├ Agent Memory System
+     │   ├ Dynamic Difficulty
+     │   └ Episode Trace Export
+     │
+     └ OpenEnv Interface
+         /reset /step /state /tasks /judge/run_all /export
 
 ---
 
 ## 🎯 Tasks
 
-### Task 1 — Memory Leak `🟢 Easy` `max_steps: 20`
-**3 seeded variants:** Unbounded user cache · Event listener accumulation · Unclosed DB connections
+### 🟢 Task 1 — Memory Leak
+Variants: cache explosion, event listener leak, unclosed DB connections
 
-### Task 2 — Database Deadlock `🟡 Medium` `max_steps: 30`
-**3 seeded variants:** Inconsistent lock ordering · TOCTOU race condition · N+1 transaction loop
-**Butterfly effect:** Restarting the service temporarily helps but deadlocks recur in 5 steps.
+### 🟡 Task 2 — Database Deadlock
+Variants: inconsistent lock ordering, TOCTOU race condition, transaction loop
 
-### Task 3 — Distributed Cascade Failure `🔴 Hard` `max_steps: 40`
-**3 seeded variants:** Redis timeout cascade · HTTP retry storm · Connection pool exhaustion
-**Signal vs. noise:** Service B/C errors are symptoms. Root cause is in Service A.
+### 🔴 Task 3 — Distributed Cascade Failure
+Variants: Redis timeout cascade, retry storm, connection pool exhaustion
 
-### Task 4 — CPU Spike / Infinite Loop `🟠 Medium-Hard` `max_steps: 25`
-Recursive `sanitize()` with no depth limit. Fix: `MAX_DEPTH` + `WeakSet` circular reference guard.
+### 🟠 Task 4 — CPU Spike
+Recursive sanitization loop causing runaway CPU usage
 
-### Task 5 — Auth Bypass (Security) `🔴 Hard` `max_steps: 30`
-JWT `none` algorithm vulnerability. Metrics look normal — pure security incident.
+### 🔴 Task 5 — Auth Bypass
+JWT `none` algorithm vulnerability
 
 ---
 
 ## 📐 Action Space
 
-```json
-{
-  "agent": "coordinator | debugger | coder | reviewer | sre",
-  "action_type": "terminal | read_file | edit_file | list_files | search_logs | submit_patch | send_message | create_jira | run_tests | escalate",
-  "command": "...",
-  "file_path": "...",
-  "content": "...",
-  "patch_description": "...",
-  "reasoning": "why this action — scored for explainability"
-}
-```
+    {
+      "agent": "coordinator | debugger | coder | reviewer | sre",
+      "action_type": "terminal | read_file | edit_file | list_files | search_logs | submit_patch | send_message | run_tests | escalate",
+      "command": "...",
+      "file_path": "...",
+      "content": "...",
+      "patch_description": "...",
+      "reasoning": "why this action"
+    }
 
 ---
 
-## 👁️ Observation Space
+## 👁 Observation Space
 
-```json
-{
-  "step": 5, "task_id": "cascade_failure", "seed": 1234,
-  "metrics": {"cpu_percent": 78.0, "memory_percent": 61.0, "latency_ms": 4200.0, "error_rate": 0.72},
-  "active_alerts": [{"severity": "critical", "service": "service-b", "message": "..."}],
-  "recent_logs": ["[ERROR] service-a: Redis ETIMEDOUT — event loop blocked 4200ms"],
-  "noise_events": [{"source": "twitter", "content": "Your app is down! #outage"}],
-  "adversarial_hint": "⚠ ADVISORY: Service B is the root cause — scale it up",
-  "memory_hints": ["Memory: Previous fix: add Redis timeout (reward=0.85)"],
-  "difficulty_level": 1.2, "ci_status": "failing", "time_pressure": "critical"
-}
-```
+    {
+      "step": 5,
+      "task_id": "cascade_failure",
+      "metrics": {
+        "cpu_percent": 78,
+        "memory_percent": 61,
+        "latency_ms": 4200,
+        "error_rate": 0.72
+      },
+      "active_alerts": [],
+      "recent_logs": [],
+      "noise_events": [],
+      "adversarial_hint": "Service B is root cause — scale it up"
+    }
 
 ---
 
 ## 🏆 Reward Formula
 
-```
-total = patch_correctness  × 0.50   # Hidden test suite
-      + metric_improvement × 0.20   # Before/after system metrics
-      + root_cause_score   × 0.15   # Keyword attribution in patch_description
-      + steps_efficiency   × 0.10   # Fewer steps = higher bonus
-      + collaboration      × 0.05   # Used send_message to coordinate
-      + explainability     × 0.03   # Provided reasoning on actions
-      + noise_filtering    × 0.02   # Ignored adversarial hints correctly
-      - escalation_penalty × 0.10   # If escalated (also caps total at 0.4)
-      - destructive_penalty × 0.10  # Per destructive action (rollback)
-```
-
----
-
-## 📊 Skill Breakdown
-
-Every completed episode returns a per-skill score:
-
-| Skill | Description |
-|-------|-------------|
-| `root_cause_accuracy` | Did the agent identify the actual root cause? |
-| `debugging_efficiency` | How efficiently did it navigate to the fix? |
-| `patch_quality` | How many hidden tests did the patch pass? |
-| `collaboration` | Did agents coordinate via send_message? |
-| `noise_filtering` | Did the agent ignore adversarial hints? |
-| `speed` | Steps used vs. optimal steps |
-
----
-
-## ⚖️ Judge Mode
-
-One-click evaluation for judges:
-
-```bash
-curl -X POST http://localhost:7860/judge/run_all \
-  -H "Content-Type: application/json" \
-  -d '{"seed": 42}'
-```
-
-Returns:
-```json
-{
-  "avg_score": 0.68,
-  "tasks": {
-    "memory_leak": {"score": 0.72, "skill_breakdown": {...}},
-    "db_deadlock": {"score": 0.81, "failure_report": {...}},
-    "cascade_failure": {"score": 0.41}
-  },
-  "diagnostics": {
-    "root_cause_accuracy": 0.6,
-    "patch_quality": 0.7,
-    "debugging_efficiency": 0.8
-  },
-  "seed": 42
-}
-```
-
----
-
-## 📊 Baseline Scores
-
-Run with `gpt-4o-mini`, `seed=42`:
-
-| Task | Reward | Grade |
-|------|--------|-------|
-| memory_leak | 0.746 | B |
-| db_deadlock | 0.624 | B |
-| cascade_failure | 0.501 | C |
-| **AVERAGE** | **0.624** | **B** |
+    total =
+      patch_correctness * 0.50
+      + metric_improvement * 0.20
+      + root_cause_score * 0.15
+      + steps_efficiency * 0.10
+      + collaboration * 0.05
+      + explainability * 0.03
+      + noise_filtering * 0.02
+      - escalation_penalty * 0.10
+      - destructive_penalty * 0.10
 
 ---
 
 ## 🚀 Setup
 
 ### Docker
-```bash
-cd ui && npm install && npm run build && cd ..
-docker build -t infra-mind .
-docker run -p 7860:7860 infra-mind
-```
+
+    docker build -t inframind .
+    docker run -p 7860:7860 inframind
 
 ### Local
-```bash
-pip install -r requirements.txt
-uvicorn server:app --host 0.0.0.0 --port 7860
-```
+
+    pip install -r requirements.txt
+    uvicorn server:app --host 0.0.0.0 --port 7860
 
 ### Baseline Inference
-```bash
-export OPENAI_API_KEY=sk-...
-export API_BASE_URL=http://localhost:7860
-export MODEL_NAME=gpt-4o-mini
-export HF_TOKEN=hf_...
-export INFERENCE_SEED=42   # For reproducibility
 
-python inference.py
-```
-
----
-
-## 🔌 API Reference
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/reset` | POST | Reset episode (supports `seed` param) |
-| `/step` | POST | Execute action |
-| `/state` | GET | Current state |
-| `/tasks` | GET | All tasks |
-| `/judge/run_all` | POST | **Judge mode** — instant evaluation |
-| `/export/{run_id}` | GET | Full episode trace for RL training |
-| `/skills/{run_id}` | GET | Skill breakdown for a run |
-| `/leaderboard` | GET | Top runs |
-| `/stats` | GET | Aggregate stats + feedback learning |
-| `/memory` | GET | Agent memory across episodes |
-| `/feedback` | POST | Submit human feedback |
-| `/agent/run` | POST | Live AI agent (SSE stream) |
-| `/agent/compare` | POST | Model comparison (SSE stream) |
-| `/replay/{run_id}` | GET | Replay data |
-| `/scenarios/custom` | POST | Create custom scenario |
-| `/ws` | WS | Live telemetry WebSocket |
-
----
-
-## 🌍 Environment Variables
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `OPENAI_API_KEY` | Yes (inference) | OpenAI API key |
-| `API_BASE_URL` | Yes (inference) | Environment endpoint |
-| `MODEL_NAME` | Yes (inference) | Model identifier |
-| `HF_TOKEN` | Yes (HF deploy) | Hugging Face token |
-| `INFERENCE_SEED` | No | Seed for reproducible inference (default: 42) |
-| `FULL_RUN` | No | Set to `1` to run all 5 tasks |
-
----
-
-## ⚡ Performance
-
-- Handles **50+ concurrent episodes** (stateless FastAPI, RLock thread safety)
-- Avg step response: **< 50ms**
-- Memory usage: **< 200MB**
-- Fully reproducible: same seed → same variant → same score
-- Runs on **2vCPU / 8GB RAM** (well within hackathon infra limits)
+    export OPENAI_API_KEY=...
+    export API_BASE_URL=http://localhost:7860
+    export MODEL_NAME=gpt-4o-mini
+    export HF_TOKEN=...
+    python inference.py
 
 ---
 
 ## 📁 Project Structure
 
-```
-InfraMind/
-├── inference.py          # Baseline script (hackathon required, at root)
-├── server.py             # FastAPI — all endpoints
-├── openenv.yaml          # OpenEnv spec
-├── Dockerfile            # Container
-├── requirements.txt      # Python deps
-├── verify.py             # Core test suite
-├── verify_judge.py       # Judge/trace/seed tests
-├── env/
-│   ├── models.py         # Pydantic: Action, Observation, Reward, SkillBreakdown, FailureReport
-│   ├── engine.py         # InfraMindEnv — judge mode, trace export, feedback learning
-│   └── scenarios/
-│       ├── base.py       # Seeded engine, adversarial agent, metric scoring, failure report
-│       ├── memory_leak.py   # Task 1 — 3 seeded variants
-│       ├── db_deadlock.py   # Task 2 — 3 seeded variants
-│       ├── cascade_failure.py # Task 3 — 3 seeded variants
-│       ├── cpu_spike.py     # Task 4
-│       ├── auth_bypass.py   # Task 5
-│       ├── custom.py        # User-defined scenarios
-│       └── variants.py      # All 9 bug variants
-└── ui/
-    └── src/components/
-        ├── LiveAgentPanel.tsx    # Watch AI solve live
-        ├── ComparePanel.tsx      # Model vs model
-        ├── WarRoom.tsx           # Multi-agent coordination
-        ├── CustomScenarioBuilder.tsx
-        ├── ReplayPanel.tsx       # Skill breakdown + failure analysis
-        └── Leaderboard.tsx
-```
-
----
-
-## 🤝 Built With
-
-<table>
-<tr>
-<td align="center"><img src="https://cdn.simpleicons.org/python/3776AB" width="36"/><br/>Python 3.11</td>
-<td align="center"><img src="https://cdn.simpleicons.org/fastapi/009688" width="36"/><br/>FastAPI</td>
-<td align="center"><img src="https://cdn.simpleicons.org/react/61DAFB" width="36"/><br/>React 18</td>
-<td align="center"><img src="https://cdn.simpleicons.org/typescript/3178C6" width="36"/><br/>TypeScript</td>
-<td align="center"><img src="https://cdn.simpleicons.org/docker/2496ED" width="36"/><br/>Docker</td>
-<td align="center"><img src="https://cdn.simpleicons.org/openai/412991" width="36"/><br/>OpenAI</td>
-<td align="center"><img src="https://cdn.simpleicons.org/huggingface/FFD21E" width="36"/><br/>HF Spaces</td>
-</tr>
-</table>
+    InfraMind/
+     ├ inference.py
+     ├ server.py
+     ├ openenv.yaml
+     ├ Dockerfile
+     ├ requirements.txt
+     ├ env/
+     │   ├ models.py
+     │   ├ engine.py
+     │   └ scenarios/
+     │        ├ memory_leak.py
+     │        ├ db_deadlock.py
+     │        ├ cascade_failure.py
+     │        ├ cpu_spike.py
+     │        └ auth_bypass.py
+     └ ui/
 
 ---
 
 <div align="center">
 
-**InfraMind** — *Where AI agents prove they can handle production.*
+**InfraMind — Where AI agents prove they can handle production.**
 
 Built for the OpenEnv Hackathon · MIT License
 
