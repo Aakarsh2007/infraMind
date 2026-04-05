@@ -1,5 +1,5 @@
 """
-Gravex-Aegis: Autonomous DevOps War-Room Environment
+InfraMind — Autonomous DevOps Benchmark
 Complete FastAPI server — OpenEnv + all enterprise features.
 """
 from __future__ import annotations
@@ -13,13 +13,13 @@ from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ValidationError
 
-from env.engine import get_env, TASK_META, AegisSwarmEnv
+from env.engine import get_env, TASK_META, InfraMindEnv, AegisSwarmEnv
 from env.models import Action, ActionType, AgentRole, FeedbackRequest, CustomScenarioRequest
 
 app = FastAPI(
-    title="Gravex-Aegis: Autonomous DevOps War-Room",
-    description="OpenEnv multi-agent SRE simulation. Fuses Aegis + Gravex. 5 tasks, live AI agent, comparison mode, replay, feedback loop, agent memory, dynamic difficulty.",
-    version="4.0.0",
+    title="InfraMind: Autonomous DevOps Benchmark",
+    description="OpenEnv multi-agent SRE simulation. 5 tasks, seeded reproducibility, live AI agent, judge mode, episode trace export, adversarial agent, skill breakdown.",
+    version="5.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
 )
@@ -27,13 +27,13 @@ app = FastAPI(
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 # ── Per-session environments for comparison mode ──────────────────────────────
-_session_envs: Dict[str, AegisSwarmEnv] = {}
+_session_envs: Dict[str, InfraMindEnv] = {}
 _session_lock = threading.Lock()
 
-def get_session_env(session_id: str) -> AegisSwarmEnv:
+def get_session_env(session_id: str) -> InfraMindEnv:
     with _session_lock:
         if session_id not in _session_envs:
-            _session_envs[session_id] = AegisSwarmEnv()
+            _session_envs[session_id] = InfraMindEnv()
         return _session_envs[session_id]
 
 # ── WebSocket ─────────────────────────────────────────────────────────────────
@@ -53,6 +53,7 @@ async def _broadcast(payload: dict):
 class ResetRequest(BaseModel):
     task_id: Optional[str] = "memory_leak"
     model: Optional[str] = "unknown"
+    seed: Optional[int] = None  # Explicit seed for reproducibility
 
 class StepRequest(BaseModel):
     agent: str = "debugger"
@@ -70,8 +71,8 @@ class StepRequest(BaseModel):
 @app.post("/reset", tags=["OpenEnv"], summary="Reset environment to a new episode")
 async def reset(req: ResetRequest):
     try:
-        obs = get_env().reset(task_id=req.task_id, model=req.model or "unknown")
-        await _broadcast({"event": "reset", "task_id": req.task_id})
+        obs = get_env().reset(task_id=req.task_id, model=req.model or "unknown", seed=req.seed)
+        await _broadcast({"event": "reset", "task_id": req.task_id, "seed": obs.seed})
         return obs.model_dump()
     except ValueError as e:
         raise HTTPException(400, str(e))
@@ -158,7 +159,7 @@ async def list_custom_scenarios():
 # ── System ────────────────────────────────────────────────────────────────────
 @app.get("/health", tags=["System"])
 async def health():
-    return {"status": "ok", "service": "gravex-aegis", "version": "4.0.0",
+    return {"status": "ok", "service": "infra-mind", "version": "5.0.0",
             "tasks": len(TASK_META), "timestamp": time.time()}
 
 @app.get("/openenv.yaml", tags=["System"], response_class=HTMLResponse)
@@ -168,6 +169,51 @@ async def openenv_yaml():
             return HTMLResponse(f.read(), media_type="text/yaml")
     except:
         raise HTTPException(404, "openenv.yaml not found")
+
+
+# ── Judge Mode ────────────────────────────────────────────────────────────────
+class JudgeRequest(BaseModel):
+    seed: int = 42
+
+@app.post("/judge/run_all", tags=["Judge"], summary="One-click evaluation across all tasks — for judges")
+async def judge_run_all(req: JudgeRequest):
+    """
+    Runs a deterministic baseline evaluation across all 5 tasks.
+    Returns avg score, per-task scores, skill diagnostics.
+    Perfect for judges who want instant testability.
+    """
+    try:
+        result = get_env().judge_run_all(seed=req.seed)
+        return result
+    except Exception as e:
+        raise HTTPException(500, str(e))
+
+
+# ── Episode Trace Export ──────────────────────────────────────────────────────
+@app.get("/export/{run_id}", tags=["Analytics"], summary="Export full episode trace for RL training / research")
+async def export_trace(run_id: str):
+    """
+    Returns complete episode trace: all steps, actions, metrics, rewards.
+    Usable for RL training datasets and research papers.
+    """
+    trace = get_env().export_trace(run_id)
+    if trace is None:
+        raise HTTPException(404, f"Run {run_id} not found")
+    return trace.model_dump()
+
+
+# ── Skill Breakdown ───────────────────────────────────────────────────────────
+@app.get("/skills/{run_id}", tags=["Analytics"], summary="Get skill breakdown for a completed run")
+async def skill_breakdown(run_id: str):
+    """Returns per-skill scores: root_cause_accuracy, debugging_efficiency, patch_quality, collaboration, noise_filtering, speed."""
+    for rec in get_env()._run_history:
+        if rec.run_id == run_id:
+            return {
+                "run_id": run_id,
+                "skill_breakdown": rec.skill_breakdown.model_dump() if rec.skill_breakdown else {},
+                "failure_report": rec.failure_report.model_dump() if rec.failure_report else {},
+            }
+    raise HTTPException(404, f"Run {run_id} not found")
 
 
 # ── Live AI Agent (SSE streaming) ─────────────────────────────────────────────
@@ -356,7 +402,7 @@ async def ws_endpoint(ws: WebSocket):
 _ui_dir = os.path.join(os.path.dirname(__file__), "ui", "dist")
 _API_PREFIXES = ("reset","step","state","tasks","leaderboard","history","stats",
                  "memory","feedback","scenarios","health","openenv","ws","docs","redoc","openapi",
-                 "agent","replay","session")
+                 "agent","replay","session","judge","export","skills")
 
 if os.path.isdir(_ui_dir):
     _assets = os.path.join(_ui_dir, "assets")
