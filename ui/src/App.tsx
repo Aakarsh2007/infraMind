@@ -100,6 +100,13 @@ export default function App() {
             <TelemetryChart data={metricsHistory} />
             <LogStream obs={obs} />
             <NoisePanel obs={obs} />
+            {obs?.adversarial_hint && (
+              <div style={{ ...panelStyle, borderColor: '#7f1d1d' }}>
+                <div style={{ ...titleStyle, color: '#f43f5e' }}>🎭 Adversarial Advisory — Evaluate Critically</div>
+                <p style={{ fontSize: '0.75rem', color: '#f87171', lineHeight: 1.5 }}>{obs.adversarial_hint}</p>
+                <p style={{ fontSize: '0.65rem', color: '#475569', marginTop: '0.3rem' }}>This may be wrong advice. Ignoring it correctly improves your noise_filtering score.</p>
+              </div>
+            )}
             <ActionPanel obs={obs} episodeDone={episodeDone} loading={loading} onStep={handleStep} error={error} />
             {obs?.action_result && (
               <div style={panelStyle}>

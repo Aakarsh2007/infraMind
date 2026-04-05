@@ -66,11 +66,54 @@ export function RewardPanel({ reward, obs, episodeDone, onReset }: Props) {
       {/* Breakdown */}
       <div style={{ marginTop: '0.75rem' }}>
         <RewardBar label="Patch Correctness" value={reward.patch_correctness} />
-        <RewardBar label="Hidden Tests Passed" value={reward.hidden_tests_passed} />
-        <RewardBar label="Step Efficiency" value={reward.steps_efficiency} />
+        <RewardBar label="Metric Improvement" value={reward.metric_improvement || 0} />
         <RewardBar label="Root Cause ID" value={reward.root_cause_identified} />
-        <RewardBar label="No Regression" value={reward.no_regression} />
+        <RewardBar label="Step Efficiency" value={reward.steps_efficiency} />
+        <RewardBar label="Noise Filtering" value={reward.noise_filtering_score || 0} />
+        <RewardBar label="Collaboration" value={reward.collaboration_score} />
       </div>
+
+      {/* Skill Breakdown */}
+      {reward.skill_breakdown && (
+        <div style={{ marginTop: '0.75rem', padding: '0.5rem', background: '#080c18', borderRadius: '0.4rem' }}>
+          <div style={{ fontSize: '0.65rem', color: '#334155', fontWeight: 700, marginBottom: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>📊 Skill Breakdown</div>
+          {Object.entries(reward.skill_breakdown).map(([k, v]) => (
+            <div key={k} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.68rem', marginBottom: '0.2rem' }}>
+              <span style={{ color: '#475569' }}>{k.replace(/_/g, ' ')}</span>
+              <span style={{ color: Number(v) >= 0.7 ? '#22c55e' : Number(v) >= 0.4 ? '#f59e0b' : '#ef4444', fontWeight: 700 }}>{(Number(v) * 100).toFixed(0)}%</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Failure Report */}
+      {reward.failure_report && (
+        <div style={{ marginTop: '0.5rem', padding: '0.5rem', background: '#080c18', borderRadius: '0.4rem' }}>
+          <div style={{ fontSize: '0.65rem', color: '#334155', fontWeight: 700, marginBottom: '0.3rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>🔍 Failure Analysis</div>
+          <div style={{ fontSize: '0.68rem', color: '#64748b', marginBottom: '0.2rem' }}>
+            <span style={{ color: reward.failure_report.agent_identified_root_cause ? '#22c55e' : '#ef4444' }}>
+              {reward.failure_report.agent_identified_root_cause ? '✓' : '✗'}
+            </span> Root cause identified
+          </div>
+          {reward.failure_report.causal_link && (
+            <div style={{ fontSize: '0.65rem', color: '#22c55e', marginBottom: '0.2rem' }}>{reward.failure_report.causal_link}</div>
+          )}
+          {reward.failure_report.wrong_actions.length > 0 && (
+            <div style={{ fontSize: '0.65rem', color: '#f87171' }}>
+              Wrong: {reward.failure_report.wrong_actions.join(', ')}
+            </div>
+          )}
+          {reward.failure_report.metric_improvement && (
+            <div style={{ marginTop: '0.3rem' }}>
+              {Object.entries(reward.failure_report.metric_improvement).map(([k, v]: [string, any]) => (
+                <div key={k} style={{ fontSize: '0.65rem', color: v.improved ? '#22c55e' : '#f87171' }}>
+                  {k}: {v.before} → {v.after} {v.improved ? '✓' : '✗'}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {reward.escalation_penalty < 0 && (
         <div style={{ fontSize: '0.72rem', color: '#f87171', marginTop: '0.25rem' }}>
