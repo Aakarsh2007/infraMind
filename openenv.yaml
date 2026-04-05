@@ -1,0 +1,249 @@
+name: gravex-aegis
+version: "1.0.0"
+description: >
+  Gravex-Aegis: Autonomous DevOps War-Room — An OpenEnv-compliant multi-agent
+  environment where AI agents act as a full SRE engineering team. Agents are
+  dropped into an actively degrading production backend, must read streaming
+  telemetry, coordinate specialized sub-agents (debugger, coder, reviewer, SRE),
+  and deploy a working code patch before the system crashes. Built by fusing
+  Aegis (autonomous remediation engine) with Gravex (multi-agent isolated
+  workspace platform). Real-world DevOps automation training benchmark.
+
+author: Gravex-Aegis Team
+license: MIT
+tags:
+  - openenv
+  - sre
+  - devops
+  - code-repair
+  - multi-agent
+  - incident-response
+  - security
+  - real-world
+
+environment:
+  type: sequential
+  stochastic: false
+  max_steps: 40
+  reward_range: [0.0, 1.0]
+
+observation_space:
+  type: object
+  description: >
+    Full system state: live metrics (CPU/memory/latency/error_rate),
+    streaming log buffer, active alerts, workspace files, agent messages,
+    noise events (support tickets, social media), action results.
+  properties:
+    step:
+      type: integer
+      description: Current step number
+    task_id:
+      type: string
+      description: Active task identifier
+    metrics:
+      type: object
+      properties:
+        cpu_percent: {type: number}
+        memory_percent: {type: number}
+        latency_ms: {type: number}
+        error_rate: {type: number}
+        active_connections: {type: integer}
+        uptime_seconds: {type: number}
+    active_alerts:
+      type: array
+      items:
+        type: object
+        properties:
+          id: {type: string}
+          severity: {type: string, enum: [info, warning, critical]}
+          service: {type: string}
+          message: {type: string}
+    recent_logs:
+      type: array
+      items: {type: string}
+    available_files:
+      type: array
+      items: {type: string}
+    action_result:
+      type: string
+      nullable: true
+    action_error:
+      type: string
+      nullable: true
+    done:
+      type: boolean
+    time_pressure:
+      type: string
+      enum: [normal, elevated, critical]
+    escalated:
+      type: boolean
+    memory_hints:
+      type: array
+      items: {type: string}
+    ci_status:
+      type: string
+      nullable: true
+    difficulty_level:
+      type: number
+      description: Dynamic difficulty multiplier (1.0 = normal, >1.0 = harder)
+
+action_space:
+  type: object
+  description: >
+    Multi-agent action. Specify which agent persona acts and what they do.
+  required: [agent, action_type]
+  properties:
+    agent:
+      type: string
+      enum: [coordinator, debugger, coder, reviewer, sre]
+      description: Which specialized agent persona takes this action
+    action_type:
+      type: string
+      enum: [terminal, read_file, edit_file, list_files, search_logs,
+             submit_patch, send_message, create_jira, run_tests, escalate]
+      description: Type of action to perform
+    command:
+      type: string
+      description: Shell command or search pattern (terminal/search_logs)
+    file_path:
+      type: string
+      description: Target file path (read_file/edit_file/list_files/submit_patch)
+    content:
+      type: string
+      description: New file content for edit_file
+    patch_description:
+      type: string
+      description: Human-readable description of the fix (submit_patch)
+    message:
+      type: string
+      description: Message content (send_message)
+    target_agent:
+      type: string
+      description: Target agent for send_message
+    reasoning:
+      type: string
+      description: Agent's reasoning for this action (used in explainability scoring)
+
+reward:
+  type: object
+  description: >
+    Structured reward with partial progress signals throughout the episode.
+    Not just binary end-of-episode — rewards intermediate correct steps.
+  properties:
+    total:
+      type: number
+      minimum: 0.0
+      maximum: 1.0
+    patch_correctness:
+      type: number
+      description: Fraction of hidden test cases passed
+    hidden_tests_passed:
+      type: number
+      description: Deterministic hidden test suite score
+    steps_efficiency:
+      type: number
+      description: Bonus for solving in fewer steps
+    root_cause_identified:
+      type: number
+      description: Partial credit for correct diagnosis in patch_description
+    no_regression:
+      type: number
+      description: Patch does not break existing functionality
+    escalation_penalty:
+      type: number
+      description: Penalty applied if agent escalated to human (-0.1)
+    reason:
+      type: string
+    post_mortem:
+      type: object
+      nullable: true
+
+tasks:
+  - id: memory_leak
+    name: "Task 1 — Memory Leak"
+    difficulty: easy
+    max_steps: 20
+    reward_range: [0.0, 1.0]
+    description: >
+      A Node.js API endpoint stores user objects in a global cache with no
+      eviction policy. Memory climbs 3% per step. Fix the unbounded cache
+      in api/users.js before OOM kills the service.
+
+  - id: db_deadlock
+    name: "Task 2 — Database Deadlock"
+    difficulty: medium
+    max_steps: 30
+    reward_range: [0.0, 1.0]
+    description: >
+      A payment service acquires PostgreSQL row locks in inconsistent order,
+      causing deadlocks under concurrent load. Fix the transaction ordering
+      in services/transfer.js. Butterfly effect: restarting the service
+      temporarily stabilizes it but the deadlock recurs in 5 steps.
+
+  - id: cascade_failure
+    name: "Task 3 — Distributed Cascade Failure"
+    difficulty: hard
+    max_steps: 40
+    reward_range: [0.0, 1.0]
+    description: >
+      Service A's Redis client has no timeout, blocking the Node.js event loop.
+      Service B floods with retries, exhausting its connection pool. Service C
+      starts failing. Logs are full of Service B errors (noise). Find the root
+      cause in service-a/cache.js and add timeout + circuit breaker.
+
+  - id: cpu_spike
+    name: "Task 4 — CPU Spike / Infinite Loop"
+    difficulty: medium-hard
+    max_steps: 25
+    reward_range: [0.0, 1.0]
+    description: >
+      A background worker's sanitize() function has no depth limit and no
+      circular reference detection, causing infinite recursion and 100% CPU.
+      Fix workers/dataProcessor.js with MAX_DEPTH and WeakSet guard.
+
+  - id: auth_bypass
+    name: "Task 5 — Auth Bypass (Security)"
+    difficulty: hard
+    max_steps: 30
+    reward_range: [0.0, 1.0]
+    description: >
+      A JWT middleware accepts the 'none' algorithm, allowing attackers to
+      forge admin tokens. The system metrics look normal (no CPU/memory spike)
+      but admin endpoints are being accessed without valid signatures.
+      Fix middleware/auth.js with algorithm whitelist.
+
+api:
+  base_url: http://localhost:7860
+  endpoints:
+    reset:
+      method: POST
+      path: /reset
+      description: Reset environment to a new episode
+    step:
+      method: POST
+      path: /step
+      description: Execute one action, returns observation+reward+done+info
+    state:
+      method: GET
+      path: /state
+      description: Get current episode state (non-destructive)
+    tasks:
+      method: GET
+      path: /tasks
+      description: List all available tasks with metadata
+    health:
+      method: GET
+      path: /health
+      description: Health check
+    leaderboard:
+      method: GET
+      path: /leaderboard
+      description: Top runs sorted by reward
+    stats:
+      method: GET
+      path: /stats
+      description: Aggregate statistics across all runs
+    feedback:
+      method: POST
+      path: /feedback
+      description: Submit human feedback on a completed run
