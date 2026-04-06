@@ -10,7 +10,7 @@ interface CompareStep { side: 'a' | 'b'; step: number; model: string; action_typ
 export function ComparePanel({ tasks }: Props) {
   const [apiKey, setApiKey] = useState('')
   const [modelA, setModelA] = useState('gpt-4o-mini')
-  const [modelB, setModelB] = useState('gpt-4o')
+  const [modelB, setModelB] = useState('llama-3.3-70b-versatile')
   const [taskId, setTaskId] = useState('memory_leak')
   const [maxSteps, setMaxSteps] = useState(15)
   const [running, setRunning] = useState(false)
@@ -75,20 +75,41 @@ export function ComparePanel({ tasks }: Props) {
       {/* Config */}
       <div style={{ ...panelStyle, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem', alignItems: 'end' }}>
         <div>
-          <label style={{ fontSize: '0.7rem', color: '#475569', display: 'block', marginBottom: '0.25rem' }}>OpenAI API Key</label>
-          <input type="password" value={apiKey} onChange={e => setApiKey(e.target.value)} placeholder="sk-..."
+          <label style={{ fontSize: '0.7rem', color: '#475569', display: 'block', marginBottom: '0.25rem' }}>API Key (OpenAI or Groq)</label>
+          <input type="password" value={apiKey} onChange={e => setApiKey(e.target.value)} placeholder="sk-... or gsk_..."
             style={{ width: '100%', background: '#080c18', border: '1px solid #1e2d4a', borderRadius: '0.4rem', padding: '0.4rem 0.6rem', color: '#e2e8f0', fontSize: '0.8rem', outline: 'none' }} />
+          <div style={{ fontSize: '0.65rem', color: '#334155', marginTop: '0.2rem' }}>One key for both models. Groq models auto-detected.</div>
         </div>
         <div>
-          <label style={{ fontSize: '0.7rem', color: '#475569', display: 'block', marginBottom: '0.25rem' }}>Model A</label>
+          <label style={{ fontSize: '0.7rem', color: '#475569', display: 'block', marginBottom: '0.25rem' }}>Model A (OpenAI)</label>
           <select value={modelA} onChange={e => setModelA(e.target.value)} style={{ width: '100%', background: '#080c18', border: '1px solid #1e2d4a', borderRadius: '0.4rem', padding: '0.4rem 0.6rem', color: '#e2e8f0', fontSize: '0.8rem', outline: 'none' }}>
-            <option value="gpt-4o-mini">gpt-4o-mini</option><option value="gpt-4o">gpt-4o</option><option value="gpt-4-turbo">gpt-4-turbo</option><option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
+            <optgroup label="OpenAI">
+              <option value="gpt-4o-mini">gpt-4o-mini</option>
+              <option value="gpt-4o">gpt-4o</option>
+              <option value="gpt-4-turbo">gpt-4-turbo</option>
+              <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
+            </optgroup>
+            <optgroup label="Groq (Free)">
+              <option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile</option>
+              <option value="llama-3.1-8b-instant">llama-3.1-8b-instant</option>
+              <option value="mixtral-8x7b-32768">mixtral-8x7b-32768</option>
+            </optgroup>
           </select>
         </div>
         <div>
-          <label style={{ fontSize: '0.7rem', color: '#475569', display: 'block', marginBottom: '0.25rem' }}>Model B</label>
+          <label style={{ fontSize: '0.7rem', color: '#475569', display: 'block', marginBottom: '0.25rem' }}>Model B (Groq)</label>
           <select value={modelB} onChange={e => setModelB(e.target.value)} style={{ width: '100%', background: '#080c18', border: '1px solid #1e2d4a', borderRadius: '0.4rem', padding: '0.4rem 0.6rem', color: '#e2e8f0', fontSize: '0.8rem', outline: 'none' }}>
-            <option value="gpt-4o">gpt-4o</option><option value="gpt-4o-mini">gpt-4o-mini</option><option value="gpt-4-turbo">gpt-4-turbo</option><option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
+            <optgroup label="Groq (Free)">
+              <option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile</option>
+              <option value="llama-3.1-8b-instant">llama-3.1-8b-instant</option>
+              <option value="mixtral-8x7b-32768">mixtral-8x7b-32768</option>
+              <option value="gemma2-9b-it">gemma2-9b-it</option>
+            </optgroup>
+            <optgroup label="OpenAI">
+              <option value="gpt-4o">gpt-4o</option>
+              <option value="gpt-4o-mini">gpt-4o-mini</option>
+              <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
+            </optgroup>
           </select>
         </div>
         <div>

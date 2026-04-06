@@ -84,10 +84,18 @@ export function WarRoom({ tasks }: Props) {
       {/* Config bar */}
       <div style={{ ...panelStyle, display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
         <div style={titleStyle}>⚔️ War Room</div>
-        <input type="password" value={apiKey} onChange={e => setApiKey(e.target.value)} placeholder="OpenAI API Key (sk-...)"
+        <input type="password" value={apiKey} onChange={e => setApiKey(e.target.value)} placeholder="OpenAI (sk-...) or Groq (gsk_...) API Key"
           style={{ flex: 1, minWidth: 200, background: '#080c18', border: '1px solid #1e2d4a', borderRadius: '0.4rem', padding: '0.4rem 0.6rem', color: '#e2e8f0', fontSize: '0.8rem', outline: 'none' }} />
         <select value={model} onChange={e => setModel(e.target.value)} style={{ background: '#080c18', border: '1px solid #1e2d4a', borderRadius: '0.4rem', padding: '0.4rem 0.6rem', color: '#e2e8f0', fontSize: '0.8rem', outline: 'none' }}>
-          <option value="gpt-4o-mini">gpt-4o-mini</option><option value="gpt-4o">gpt-4o</option>
+          <optgroup label="OpenAI">
+            <option value="gpt-4o-mini">gpt-4o-mini</option>
+            <option value="gpt-4o">gpt-4o</option>
+          </optgroup>
+          <optgroup label="Groq (Free)">
+            <option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile</option>
+            <option value="llama-3.1-8b-instant">llama-3.1-8b-instant</option>
+            <option value="mixtral-8x7b-32768">mixtral-8x7b-32768</option>
+          </optgroup>
         </select>
         <select value={taskId} onChange={e => setTaskId(e.target.value)} style={{ background: '#080c18', border: '1px solid #1e2d4a', borderRadius: '0.4rem', padding: '0.4rem 0.6rem', color: '#e2e8f0', fontSize: '0.8rem', outline: 'none' }}>
           {tasks.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}

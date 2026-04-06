@@ -16,7 +16,13 @@ interface AgentStep {
 const agentColor = (a: string) => a === 'coordinator' ? '#8b5cf6' : a === 'debugger' ? '#f97316' : a === 'coder' ? '#22c55e' : a === 'reviewer' ? '#60a5fa' : '#f43f5e'
 const agentIcon = (a: string) => a === 'coordinator' ? '🧠' : a === 'debugger' ? '🔍' : a === 'coder' ? '⚙️' : a === 'reviewer' ? '👁️' : '🚨'
 
+const PROVIDERS = [
+  { id: 'openai', label: 'OpenAI', placeholder: 'sk-...', models: ['gpt-4o-mini', 'gpt-4o', 'gpt-4-turbo', 'gpt-3.5-turbo'] },
+  { id: 'groq', label: 'Groq (Free)', placeholder: 'gsk_...', models: ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'llama3-70b-8192', 'mixtral-8x7b-32768', 'gemma2-9b-it'] },
+]
+
 export function LiveAgentPanel({ tasks }: Props) {
+  const [provider, setProvider] = useState('openai')
   const [apiKey, setApiKey] = useState('')
   const [model, setModel] = useState('gpt-4o-mini')
   const [taskId, setTaskId] = useState('memory_leak')
@@ -30,8 +36,17 @@ export function LiveAgentPanel({ tasks }: Props) {
   const stopRef = useRef<(() => void) | null>(null)
   const logsRef = useRef<HTMLDivElement>(null)
 
+  const currentProvider = PROVIDERS.find(p => p.id === provider) || PROVIDERS[0]
+
+  const handleProviderChange = (pid: string) => {
+    setProvider(pid)
+    const p = PROVIDERS.find(x => x.id === pid)
+    if (p) setModel(p.models[0])
+    setApiKey('')
+  }
+
   const start = useCallback(() => {
-    if (!apiKey.trim()) { setErrorMsg('Enter your OpenAI API key first'); return }
+    if (!apiKey.trim()) { setErrorMsg(`Enter your ${currentProvider.label} API key first`); return }
     setRunning(true); setSteps([]); setMetrics([]); setFinalReward(null)
     setStatus('running'); setErrorMsg('')
 
@@ -59,12 +74,15 @@ export function LiveAgentPanel({ tasks }: Props) {
       () => { setRunning(false); if (status === 'running') setStatus('done') }
     )
     stopRef.current = stop
-  }, [apiKey, model, taskId, maxSteps, status])
+  }, [apiKey, model, taskId, maxSteps, status, currentProvider])
 
   const stop = () => { stopRef.current?.(); setRunning(false); setStatus('done') }
 
   const totalReward = finalReward ? Number(finalReward.total || 0) : null
   const rewardColor = totalReward !== null ? (totalReward >= 0.7 ? '#22c55e' : totalReward >= 0.4 ? '#f59e0b' : '#ef4444') : '#475569'
+
+  const inp: React.CSSProperties = { width: '100%', background: '#080c18', border: '1px solid #1e2d4a', borderRadius: '0.4rem', padding: '0.45rem 0.6rem', color: '#e2e8f0', fontSize: '0.8rem', outline: 'none', marginBottom: '0.5rem' }
+  const sel: React.CSSProperties = { ...inp, cursor: 'pointer' }
 
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '1.25rem' }}>
@@ -74,25 +92,37 @@ export function LiveAgentPanel({ tasks }: Props) {
           <div style={panelStyle}>
             <div style={titleStyle}>🤖 Live AI Agent</div>
             <p style={{ fontSize: '0.72rem', color: '#475569', marginBottom: '0.75rem', lineHeight: 1.5 }}>
-              Watch an AI agent solve a real incident in real time. Your API key is used directly and never stored.
+              Watch an AI agent solve a real incident live. Your API key is used directly and never stored on the server.
             </p>
 
-            <label style={{ fontSize: '0.7rem', color: '#475569', display: 'block', marginBottom: '0.25rem' }}>OpenAI API Key</label>
+            {/* Provider selector */}
+            <label style={{ fontSize: '0.7rem', color: '#475569', display: 'block', marginBottom: '0.25rem' }}>Provider</label>
+            <div style={{ display: 'flex', gap: '0.4rem', marginBottom: '0.5rem' }}>
+              {PROVIDERS.map(p => (
+                <button key={p.id} onClick={() => handleProviderChange(p.id)} style={{
+                  flex: 1, padding: '0.4rem', border: `1px solid ${provider === p.id ? '#3b82f6' : '#1e2d4a'}`,
+                  borderRadius: '0.4rem', background: provider === p.id ? '#1e3a5f22' : 'transparent',
+                  color: provider === p.id ? '#60a5fa' : '#475569', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer',
+                }}>
+                  {p.label}
+                </button>
+              ))}
+            </div>
+
+            <label style={{ fontSize: '0.7rem', color: '#475569', display: 'block', marginBottom: '0.25rem' }}>
+              {currentProvider.label} API Key
+              {provider === 'groq' && <span style={{ color: '#22c55e', marginLeft: '0.4rem', fontSize: '0.65rem' }}>Free tier available at console.groq.com</span>}
+            </label>
             <input type="password" value={apiKey} onChange={e => setApiKey(e.target.value)}
-              placeholder="sk-..." style={{ width: '100%', background: '#080c18', border: '1px solid #1e2d4a', borderRadius: '0.4rem', padding: '0.45rem 0.6rem', color: '#e2e8f0', fontSize: '0.8rem', marginBottom: '0.5rem', outline: 'none' }} />
+              placeholder={currentProvider.placeholder} style={inp} />
 
             <label style={{ fontSize: '0.7rem', color: '#475569', display: 'block', marginBottom: '0.25rem' }}>Model</label>
-            <select value={model} onChange={e => setModel(e.target.value)}
-              style={{ width: '100%', background: '#080c18', border: '1px solid #1e2d4a', borderRadius: '0.4rem', padding: '0.4rem 0.6rem', color: '#e2e8f0', fontSize: '0.8rem', marginBottom: '0.5rem', outline: 'none' }}>
-              <option value="gpt-4o-mini">gpt-4o-mini (fast, cheap)</option>
-              <option value="gpt-4o">gpt-4o (best quality)</option>
-              <option value="gpt-4-turbo">gpt-4-turbo</option>
-              <option value="gpt-3.5-turbo">gpt-3.5-turbo (budget)</option>
+            <select value={model} onChange={e => setModel(e.target.value)} style={sel}>
+              {currentProvider.models.map(m => <option key={m} value={m}>{m}</option>)}
             </select>
 
             <label style={{ fontSize: '0.7rem', color: '#475569', display: 'block', marginBottom: '0.25rem' }}>Task</label>
-            <select value={taskId} onChange={e => setTaskId(e.target.value)}
-              style={{ width: '100%', background: '#080c18', border: '1px solid #1e2d4a', borderRadius: '0.4rem', padding: '0.4rem 0.6rem', color: '#e2e8f0', fontSize: '0.8rem', marginBottom: '0.5rem', outline: 'none' }}>
+            <select value={taskId} onChange={e => setTaskId(e.target.value)} style={sel}>
               {tasks.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
             </select>
 
@@ -131,12 +161,10 @@ export function LiveAgentPanel({ tasks }: Props) {
         {/* Live feed */}
         <div>
           <TelemetryChart data={metrics} />
-
-          {/* Agent steps */}
           <div style={panelStyle}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
               <div style={titleStyle}>🎬 Live Agent Feed</div>
-              {running && <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 8px #22c55e', animation: 'pulse 1s infinite' }} />}
+              {running && <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 8px #22c55e' }} />}
               <span style={{ fontSize: '0.68rem', color: '#334155', marginLeft: 'auto' }}>{steps.length} steps</span>
             </div>
             <div ref={logsRef} style={{ maxHeight: '420px', overflowY: 'auto' }}>
@@ -144,6 +172,7 @@ export function LiveAgentPanel({ tasks }: Props) {
                 <div style={{ textAlign: 'center', padding: '2rem', color: '#334155' }}>
                   <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🤖</div>
                   <div style={{ fontSize: '0.85rem' }}>Configure and click "Watch AI Solve It"</div>
+                  <div style={{ fontSize: '0.72rem', color: '#1e2d4a', marginTop: '0.5rem' }}>Works with OpenAI and Groq (free)</div>
                 </div>
               )}
               {steps.map((s, i) => (
@@ -170,7 +199,7 @@ export function LiveAgentPanel({ tasks }: Props) {
               ))}
               {running && (
                 <div style={{ padding: '0.5rem', display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
-                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#60a5fa', animation: 'pulse 0.8s infinite' }} />
+                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#60a5fa' }} />
                   <span style={{ fontSize: '0.7rem', color: '#475569' }}>Agent thinking...</span>
                 </div>
               )}
