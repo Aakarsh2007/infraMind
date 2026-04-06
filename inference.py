@@ -45,10 +45,22 @@ MAX_STEPS_PER_TASK = 20  # keeps runtime well under 20 min
 SUCCESS_SCORE_THRESHOLD = 0.3
 
 # ── Clients ───────────────────────────────────────────────────────────────────
-openai_client = OpenAI(
-    api_key=OPENAI_API_KEY or HF_TOKEN or "no-key",
-    base_url=None,  # uses default OpenAI endpoint
-)
+# Auto-detect Groq models — use OpenAI client with Groq base URL
+_GROQ_MODELS = {"llama-3.3-70b-versatile","llama-3.1-8b-instant","llama3-70b-8192",
+                "llama3-8b-8192","mixtral-8x7b-32768","gemma2-9b-it","gemma-7b-it"}
+_GROQ_BASE_URL = "https://api.groq.com/openai/v1"
+
+def _is_groq(model: str) -> bool:
+    return model in _GROQ_MODELS or model.startswith(("llama","mixtral","gemma"))
+
+_api_key = OPENAI_API_KEY or HF_TOKEN or "no-key"
+if _is_groq(MODEL_NAME):
+    openai_client = OpenAI(api_key=_api_key, base_url=_GROQ_BASE_URL)
+    print(f"Provider: Groq ({MODEL_NAME})", flush=True)
+else:
+    openai_client = OpenAI(api_key=_api_key)
+    print(f"Provider: OpenAI ({MODEL_NAME})", flush=True)
+
 http = httpx.Client(base_url=API_BASE_URL, timeout=60.0)
 
 # Global timeout guard — 18 min hard cap
