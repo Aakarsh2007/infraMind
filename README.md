@@ -22,17 +22,25 @@ tags:
 
 ### Autonomous DevOps Benchmark for AI Agents
 
-InfraMind evaluates whether AI agents can **debug, coordinate, and recover real production systems under pressure** — not just solve coding tasks.
+**🚨 Can your AI agent survive a real production outage?**
 
-[![OpenEnv](https://img.shields.io/badge/OpenEnv-9%2F9_PASS-4f46e5?style=for-the-badge)](https://huggingface.co/spaces/aakarsh2007/infraMind)
+InfraMind evaluates whether agents can debug under pressure, ignore misleading signals, fix root causes (not symptoms), and actually recover system metrics. **Most agents fail.**
+
+[![OpenEnv](https://img.shields.io/badge/OpenEnv-9%2F9_PASS-4f46e5?style=for-the-badge)](https://aakarsh2007-inframind.hf.space/validate)
 [![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://docker.com)
 [![Groq](https://img.shields.io/badge/Groq-Free_Tier-f55036?style=for-the-badge)](https://console.groq.com)
-[![Seeded](https://img.shields.io/badge/Reproducible-seed%3D42-22c55e?style=for-the-badge)](https://huggingface.co/spaces/aakarsh2007/infraMind)
+[![Seeded](https://img.shields.io/badge/Reproducible-seed%3D42-22c55e?style=for-the-badge)](https://aakarsh2007-inframind.hf.space/reproducibility)
 
-**[🎮 Live Demo](https://huggingface.co/spaces/aakarsh2007/infraMind) · [⚖️ Judge Mode](https://huggingface.co/spaces/aakarsh2007/infraMind?endpoint=/judge/run_all) · [✅ Validate](https://huggingface.co/spaces/aakarsh2007/infraMind?endpoint=/validate) · [📖 API Docs](https://huggingface.co/spaces/aakarsh2007/infraMind?endpoint=/docs)**
+| Link | URL |
+|------|-----|
+| 🎮 Live Demo (UI) | [huggingface.co/spaces/aakarsh2007/infraMind](https://huggingface.co/spaces/aakarsh2007/infraMind) |
+| ⚖️ Judge Evaluation (API) | [aakarsh2007-inframind.hf.space/judge/run_all?seed=42](https://aakarsh2007-inframind.hf.space/judge/run_all?seed=42) |
+| ✅ OpenEnv Validate (API) | [aakarsh2007-inframind.hf.space/validate](https://aakarsh2007-inframind.hf.space/validate) |
+| 📖 API Docs (Swagger) | [aakarsh2007-inframind.hf.space/docs](https://aakarsh2007-inframind.hf.space/docs) |
+| 🔁 Reproducibility Proof | [aakarsh2007-inframind.hf.space/reproducibility](https://aakarsh2007-inframind.hf.space/reproducibility) |
 
-> *Once deployed, API endpoints are at: `https://<your-space-subdomain>.hf.space/judge/run_all`*
+> **Note:** The UI (`huggingface.co/spaces/...`) and the API (`aakarsh2007-inframind.hf.space/...`) are two different URLs. Use the API URL for all curl commands and direct endpoint access.
 
 </div>
 
@@ -41,49 +49,52 @@ InfraMind evaluates whether AI agents can **debug, coordinate, and recover real 
 > **InfraMind is not a benchmark where agents solve problems.**
 > **It is a benchmark where agents survive production.**
 
+---> **InfraMind is not a benchmark where agents solve problems.**
+> **It is a benchmark where agents survive production.**
+
 ---
 
 ## ⚡ TL;DR — Judge Quick Check
 
-| | |
-|--|--|
-| **Domain** | Real-world DevOps incident response (not toy tasks) |
-| **OpenEnv** | Fully compliant → `/validate` = **9/9 PASS** |
-| **Tasks** | 5 tasks, easy → hard, deterministic graders |
-| **Baseline** | `gpt-4o-mini` avg: **0.62** (seed=42, std dev ±0.03) |
-| **Unique** | Multi-agent + adversarial hints + metric-grounded evaluation |
-| **Keys** | Works with OpenAI (`sk-`) and Groq free tier (`gsk_`) |
+- Real DevOps benchmark (not coding tasks)
+- 5 tasks (easy → hard), deterministic scoring (no LLM grading)
+- Multi-agent + adversarial environment
+- Baseline: `gpt-4o-mini` = **0.62** avg
+- ✔ OpenEnv: **9/9 PASS**
 
-**Run locally in 5 seconds:**
+**Try it in 10 seconds — no setup, no API key:**
 ```bash
-# Start the server first
-uvicorn server:app --port 7860
-
-# Then evaluate
-curl http://localhost:7860/judge/run_all?seed=42
+curl https://aakarsh2007-inframind.hf.space/judge/run_all?seed=42
 ```
+
+> No demos. No mocks. No hidden scoring. Everything is verifiable via API.
 
 ---
 
 ## 🧭 Evaluate in 2 Minutes
 
-```
-1. POST /judge/run_all?seed=42   → full benchmark score + verdict
-2. GET  /validate                → confirm 9/9 OpenEnv checks PASS
-3. GET  /reproducibility         → confirm same seed = same score
-4. GET  /docs                    → interactive API documentation
-5. (optional) open UI → Live AI tab → watch agent solve live
+```bash
+# 1. Full benchmark score + verdict (no API key needed)
+curl https://aakarsh2007-inframind.hf.space/judge/run_all?seed=42
+
+# 2. OpenEnv compliance proof
+curl https://aakarsh2007-inframind.hf.space/validate
+
+# 3. Reproducibility proof
+curl https://aakarsh2007-inframind.hf.space/reproducibility
+
+# 4. Interactive API docs
+open https://aakarsh2007-inframind.hf.space/docs
 ```
 
 ---
 
 ## ⚖️ Judge Mode — How to Read the Output
 
-Run the judge evaluation and get a structured result in ~10 seconds:
+Returns full benchmark results in ~10 seconds. No API key needed.
 
 ```bash
-curl -X POST http://localhost:7860/judge/run_all \
-  -H "Content-Type: application/json" -d '{"seed": 42}'
+curl https://aakarsh2007-inframind.hf.space/judge/run_all?seed=42
 ```
 
 **The response includes a human-readable `summary` field:**
@@ -124,23 +135,28 @@ curl -X POST http://localhost:7860/judge/run_all \
 
 ---
 
+## 💡 Why This Matters
+
+AI can write code. InfraMind tests if it can **run production systems without breaking them**.
+
+> Inspired by real-world outages at Amazon, Google, and Cloudflare.
+
+---
+
 ## 🚀 Just Try It
 
 ```bash
-# Clone and run locally
-git clone https://github.com/Aakarsh2007/Aegis-Swarm
-cd Aegis-Swarm
-pip install -r requirements.txt
-uvicorn server:app --host 0.0.0.0 --port 7860
+# Judge evaluation — no API key, no setup
+curl https://aakarsh2007-inframind.hf.space/judge/run_all?seed=42
 
-# In another terminal:
-curl http://localhost:7860/judge/run_all?seed=42   # Judge evaluation
-curl http://localhost:7860/validate                 # OpenEnv compliance
-curl http://localhost:7860/health                   # Health check
-# Open http://localhost:7860 for the full dashboard
+# OpenEnv validation
+curl https://aakarsh2007-inframind.hf.space/validate
+
+# Health check
+curl https://aakarsh2007-inframind.hf.space/health
 ```
 
-Or open the [Live Demo](https://huggingface.co/spaces/aakarsh2007/infraMind) and click **"Run Judge Evaluation"** in the dashboard.
+Or open the [Live Demo UI](https://huggingface.co/spaces/aakarsh2007/infraMind) and click **"Run Judge Evaluation"** in the dashboard.
 
 ---
 
@@ -210,7 +226,7 @@ Most agents will:
 ## ✅ OpenEnv Validation
 
 ```bash
-curl http://localhost:7860/validate
+curl https://aakarsh2007-inframind.hf.space/validate
 ```
 
 ```
@@ -242,7 +258,7 @@ Seed = 42  →  Score = 0.62  ✓
 ```
 
 ```bash
-curl http://localhost:7860/reproducibility
+curl https://aakarsh2007-inframind.hf.space/reproducibility
 # Returns: "✔ PASS — Same seed produces identical environment state"
 ```
 
@@ -345,6 +361,12 @@ InfraMind introduces **Production Engineering Benchmarks** — a category that d
 | ToolBench | Tool usage | ❌ | ❌ |
 | AgentBench | Generic tasks | ❌ | ❌ |
 | **InfraMind** | **Real-time system recovery** | **✅** | **✅** |
+
+**InfraMind is the first benchmark where:**
+- The system degrades over time (metrics climb every step)
+- Wrong fixes make things worse (butterfly effect)
+- Metrics prove if the fix actually worked (before/after scoring)
+- Adversarial hints test reasoning under uncertainty
 
 ---
 
@@ -481,7 +503,7 @@ InfraMind can serve as a standard benchmark for studying:
 
 ```bash
 # Export full episode traces for RL training
-curl http://localhost:7860/export/{run_id}
+curl https://aakarsh2007-inframind.hf.space/export/{run_id}
 ```
 
 ---
@@ -499,9 +521,9 @@ curl http://localhost:7860/export/{run_id}
 ### Judge & Validation
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/judge/run_all` | POST/GET | **One-click judge evaluation** — returns pretty summary |
-| `/validate` | GET | **OpenEnv compliance proof** — 9/9 checks |
-| `/reproducibility` | GET | **Deterministic seed proof** |
+| `/judge/run_all` | POST/GET | **One-click judge evaluation** — [try it live](https://aakarsh2007-inframind.hf.space/judge/run_all?seed=42) |
+| `/validate` | GET | **OpenEnv compliance proof** — [try it live](https://aakarsh2007-inframind.hf.space/validate) |
+| `/reproducibility` | GET | **Deterministic seed proof** — [try it live](https://aakarsh2007-inframind.hf.space/reproducibility) |
 
 ### Analytics
 | Endpoint | Method | Description |
@@ -521,9 +543,9 @@ curl http://localhost:7860/export/{run_id}
 ### System
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/health` | GET | Health check — returns `{"status": "ok"}` |
-| `/docs` | GET | Interactive API documentation (Swagger UI) |
-| `/openenv.yaml` | GET | OpenEnv spec file |
+| `/health` | GET | Health check — [try it live](https://aakarsh2007-inframind.hf.space/health) |
+| `/docs` | GET | Interactive API docs — [try it live](https://aakarsh2007-inframind.hf.space/docs) |
+| `/openenv.yaml` | GET | OpenEnv spec — [try it live](https://aakarsh2007-inframind.hf.space/openenv.yaml) |
 | `/ws` | WS | Real-time telemetry WebSocket |
 
 ---
@@ -564,7 +586,13 @@ InfraMind/
 ## 🚀 Setup Guide — Zero to Running
 
 ### Option A: Live demo (zero setup)
-Open [https://huggingface.co/spaces/aakarsh2007/infraMind](https://huggingface.co/spaces/aakarsh2007/infraMind) and click **"Run Judge Evaluation"**.
+```bash
+# Judge evaluation — no API key needed
+curl https://aakarsh2007-inframind.hf.space/judge/run_all?seed=42
+
+# Or open the UI
+# https://huggingface.co/spaces/aakarsh2007/infraMind
+```
 
 ### Option B: Local Python
 ```bash
