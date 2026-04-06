@@ -21,8 +21,8 @@ export function Header({ tab, setTab, wsConnected, obs, episodeDone }: Props) {
     <div style={{ background: 'linear-gradient(135deg,#080c18 0%,#0f1629 100%)', borderBottom: '1px solid #1e2d4a', padding: '0 1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', height: '52px', position: 'sticky', top: 0, zIndex: 100, overflowX: 'auto' }}>
       {/* Logo */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginRight: '0.5rem', flexShrink: 0 }}>
-        <span style={{ fontSize: '1.3rem' }}>⚔️</span>
-        <span style={{ fontSize: '1rem', fontWeight: 800, background: 'linear-gradient(135deg,#f97316,#ef4444,#8b5cf6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', whiteSpace: 'nowrap' }}>Gravex-Aegis</span>
+        <span style={{ fontSize: '1.3rem' }}>🧠</span>
+        <span style={{ fontSize: '1rem', fontWeight: 800, background: 'linear-gradient(135deg,#60a5fa,#8b5cf6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', whiteSpace: 'nowrap' }}>InfraMind</span>
       </div>
 
       {TABS.map(t => (
