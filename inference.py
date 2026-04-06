@@ -1,19 +1,22 @@
 """
 InfraMind — Baseline Inference Script
-OpenEnv Hackathon Round 1 — Fully compliant with mandatory stdout format.
+OpenEnv Hackathon Round 1 — Strictly compliant with sample inference.py format.
 
-STDOUT FORMAT (exact — no deviation):
+STDOUT FORMAT (exact — no deviation allowed):
   [START] task=<task_name> env=<benchmark> model=<model_name>
   [STEP]  step=<n> action=<action_str> reward=<0.00> done=<true|false> error=<msg|null>
   [END]   success=<true|false> steps=<n> score=<score> rewards=<r1,r2,...,rn>
 
-Env vars:
-  API_BASE_URL   — environment API endpoint
-  MODEL_NAME     — model identifier
-  HF_TOKEN       — Hugging Face / API key
-  OPENAI_API_KEY — OpenAI API key
-  INFERENCE_SEED — seed for reproducibility (default: 42)
-  FULL_RUN       — set to "1" to run all 5 tasks (default: 3 required tasks)
+Mandatory env vars (per hackathon spec):
+  API_BASE_URL   — The API endpoint for the LLM
+  MODEL_NAME     — The model identifier to use for inference
+  HF_TOKEN       — Your Hugging Face / API key
+  OPENAI_API_KEY — OpenAI API key (alternative to HF_TOKEN)
+
+Optional:
+  INFRA_ENV_URL  — InfraMind environment URL (default: http://localhost:7860)
+  INFERENCE_SEED — Reproducibility seed (default: 42)
+  FULL_RUN       — Set to "1" to run all 5 tasks (default: 3 required tasks)
 """
 from __future__ import annotations
 
@@ -26,48 +29,40 @@ from typing import Any, Dict, List, Optional
 import httpx
 from openai import OpenAI
 
-# ── Mandatory env vars ────────────────────────────────────────────────────────
-API_BASE_URL   = os.environ.get("API_BASE_URL", "http://localhost:7860")
-MODEL_NAME     = os.environ.get("MODEL_NAME", "gpt-4o-mini")
-HF_TOKEN       = os.environ.get("HF_TOKEN", "")
-OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
-INFERENCE_SEED = int(os.environ.get("INFERENCE_SEED", "42"))
+# ── Mandatory env vars (per hackathon spec) ───────────────────────────────────
+# API_BASE_URL = LLM endpoint (as required by hackathon)
+# Defaults set ONLY for API_BASE_URL and MODEL_NAME (not HF_TOKEN)
+API_BASE_URL = os.getenv("API_BASE_URL") or "https://api.openai.com/v1"
+MODEL_NAME   = os.getenv("MODEL_NAME") or "gpt-4o-mini"
+HF_TOKEN     = os.getenv("HF_TOKEN") or os.getenv("API_KEY")
 
+# InfraMind environment URL (separate from LLM endpoint)
+INFRA_ENV_URL = os.getenv("INFRA_ENV_URL") or "http://localhost:7860"
+
+INFERENCE_SEED = int(os.getenv("INFERENCE_SEED") or "42")
 BENCHMARK = "infra-mind"
 
 # 3 required tasks for baseline; FULL_RUN=1 runs all 5
 TASK_IDS: List[str] = (
     ["memory_leak", "db_deadlock", "cascade_failure", "cpu_spike", "auth_bypass"]
-    if os.environ.get("FULL_RUN") == "1"
+    if os.getenv("FULL_RUN") == "1"
     else ["memory_leak", "db_deadlock", "cascade_failure"]
 )
 MAX_STEPS_PER_TASK = 20  # keeps runtime well under 20 min
 SUCCESS_SCORE_THRESHOLD = 0.3
 
-# ── Clients ───────────────────────────────────────────────────────────────────
-# Auto-detect Groq models — use OpenAI client with Groq base URL
-_GROQ_MODELS = {"llama-3.3-70b-versatile","llama-3.1-8b-instant","llama3-70b-8192",
-                "llama3-8b-8192","mixtral-8x7b-32768","gemma2-9b-it","gemma-7b-it"}
-_GROQ_BASE_URL = "https://api.groq.com/openai/v1"
+# ── OpenAI client — uses API_BASE_URL as LLM endpoint (per hackathon spec) ───
+API_KEY = HF_TOKEN or os.getenv("OPENAI_API_KEY") or "no-key"
+openai_client = OpenAI(base_url=API_BASE_URL, api_key=API_KEY)
 
-def _is_groq(model: str) -> bool:
-    return model in _GROQ_MODELS or model.startswith(("llama","mixtral","gemma"))
+# InfraMind environment HTTP client
+http = httpx.Client(base_url=INFRA_ENV_URL, timeout=60.0)
 
-_api_key = OPENAI_API_KEY or HF_TOKEN or "no-key"
-if _is_groq(MODEL_NAME):
-    openai_client = OpenAI(api_key=_api_key, base_url=_GROQ_BASE_URL)
-    print(f"Provider: Groq ({MODEL_NAME})", flush=True)
-else:
-    openai_client = OpenAI(api_key=_api_key)
-    print(f"Provider: OpenAI ({MODEL_NAME})", flush=True)
-
-http = httpx.Client(base_url=API_BASE_URL, timeout=60.0)
-
-# Global timeout guard — 18 min hard cap
+# Global timeout guard — 18 min hard cap (< 20 min requirement)
 INFERENCE_START = time.time()
 MAX_TOTAL_SECONDS = 18 * 60
 
-# ── Mandatory log helpers (exact format — do not change) ──────────────────────
+# ── Mandatory log helpers — exact format, no deviation ───────────────────────
 
 def log_start(task: str, env: str, model: str) -> None:
     print(f"[START] task={task} env={env} model={model}", flush=True)
@@ -75,7 +70,6 @@ def log_start(task: str, env: str, model: str) -> None:
 def log_step(step: int, action: str, reward: float, done: bool, error: Optional[str]) -> None:
     error_val = error if error else "null"
     done_val = str(done).lower()
-    # Sanitize action string — no spaces or newlines inside
     action_clean = action.replace("\n", " ").replace('"', "'")[:80]
     print(
         f"[STEP] step={step} action={action_clean} reward={reward:.2f} done={done_val} error={error_val}",
@@ -101,7 +95,7 @@ def env_step(action: Dict[str, Any]) -> Dict[str, Any]:
     r.raise_for_status()
     return r.json()
 
-# ── Agent ─────────────────────────────────────────────────────────────────────
+# ── Agent system prompt ───────────────────────────────────────────────────────
 
 SYSTEM_PROMPT = """\
 You are an elite SRE AI agent in the InfraMind environment.
@@ -194,7 +188,6 @@ def run_task(task_id: str) -> Dict[str, Any]:
             if done:
                 break
 
-            # Get action from LLM
             try:
                 action_dict = get_agent_action(history, obs)
             except Exception as e:
@@ -203,7 +196,6 @@ def run_task(task_id: str) -> Dict[str, Any]:
 
             action_str = action_dict.get("action_type", "unknown")
 
-            # Execute in environment
             try:
                 result = env_step(action_dict)
             except Exception as e:
@@ -220,19 +212,13 @@ def run_task(task_id: str) -> Dict[str, Any]:
             rewards.append(step_reward)
             steps_taken = step
 
-            log_step(
-                step=step,
-                action=action_str,
-                reward=step_reward,
-                done=done,
-                error=last_error,
-            )
+            log_step(step=step, action=action_str, reward=step_reward, done=done, error=last_error)
 
             if done:
                 score = float(reward_data.get("total", 0.0))
                 break
 
-        # Force submit if not done
+        # Force submit if not done (always emit [END])
         if not done:
             try:
                 files = obs.get("available_files", [])
@@ -259,28 +245,23 @@ def run_task(task_id: str) -> Dict[str, Any]:
         score = 0.0
         success = False
 
+    # Always emit [END] — even on exception (per spec)
     log_end(success=success, steps=steps_taken, score=score, rewards=rewards)
 
-    return {
-        "task_id": task_id,
-        "score": score,
-        "steps": steps_taken,
-        "success": success,
-        "rewards": rewards,
-    }
+    return {"task_id": task_id, "score": score, "steps": steps_taken, "success": success, "rewards": rewards}
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def main() -> None:
-    print(f"InfraMind Baseline Inference | API={API_BASE_URL} | MODEL={MODEL_NAME} | SEED={INFERENCE_SEED}", flush=True)
+    print(f"InfraMind | LLM={API_BASE_URL} | MODEL={MODEL_NAME} | ENV={INFRA_ENV_URL} | SEED={INFERENCE_SEED}", flush=True)
 
-    # Verify environment is reachable
+    # Verify InfraMind environment is reachable
     try:
         r = http.get("/health")
         r.raise_for_status()
-        print(f"Environment: {r.json().get('service')} v{r.json().get('version')} — OK", flush=True)
+        print(f"Environment health: {r.json().get('status')} — OK", flush=True)
     except Exception as e:
-        print(f"ERROR: Cannot reach {API_BASE_URL}: {e}", file=sys.stderr)
+        print(f"ERROR: Cannot reach InfraMind at {INFRA_ENV_URL}: {e}", file=sys.stderr)
         sys.exit(1)
 
     results = []
@@ -290,17 +271,17 @@ def main() -> None:
             results.append(result)
         except Exception as e:
             print(f"ERROR running {task_id}: {e}", file=sys.stderr)
+            # Always emit [END] even on exception
+            log_end(success=False, steps=0, score=0.0, rewards=[])
             results.append({"task_id": task_id, "score": 0.0, "steps": 0, "success": False, "rewards": []})
 
-    # Summary
     avg_score = sum(r["score"] for r in results) / max(len(results), 1)
     print(f"\n{'='*55}", flush=True)
     print(f"INFRA MIND BASELINE — Model: {MODEL_NAME}", flush=True)
     for r in results:
         grade = "S" if r["score"] >= 0.9 else "A" if r["score"] >= 0.7 else "B" if r["score"] >= 0.5 else "C" if r["score"] >= 0.3 else "F"
-        status = "✓" if r["success"] else "✗"
-        print(f"  {status} {r['task_id']:22s}  score={r['score']:.3f}  steps={r['steps']}  grade={grade}", flush=True)
-    print(f"  {'AVERAGE':24s}  score={avg_score:.3f}", flush=True)
+        print(f"  {'✓' if r['success'] else '✗'} {r['task_id']:22s}  score={r['score']:.2f}  steps={r['steps']}  grade={grade}", flush=True)
+    print(f"  {'AVERAGE':24s}  score={avg_score:.2f}", flush=True)
     print(f"{'='*55}", flush=True)
 
 

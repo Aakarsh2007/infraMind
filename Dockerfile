@@ -1,8 +1,8 @@
 FROM python:3.11-slim
 
-LABEL org.opencontainers.image.title="Gravex-Aegis: Autonomous DevOps War-Room"
-LABEL org.opencontainers.image.description="OpenEnv multi-agent SRE simulation — Gravex + Aegis fusion"
-LABEL org.opencontainers.image.version="2.0.0"
+LABEL org.opencontainers.image.title="InfraMind: Autonomous DevOps Benchmark"
+LABEL org.opencontainers.image.description="OpenEnv multi-agent SRE simulation — 5 real-world tasks, seeded reproducibility, adversarial agent"
+LABEL org.opencontainers.image.version="5.0.0"
 
 RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
 

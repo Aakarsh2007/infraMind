@@ -1,15 +1,14 @@
-name: gravex-aegis
+name: infra-mind
 version: "1.0.0"
 description: >
-  Gravex-Aegis: Autonomous DevOps War-Room — An OpenEnv-compliant multi-agent
+  InfraMind: Autonomous DevOps Benchmark — An OpenEnv-compliant multi-agent
   environment where AI agents act as a full SRE engineering team. Agents are
   dropped into an actively degrading production backend, must read streaming
   telemetry, coordinate specialized sub-agents (debugger, coder, reviewer, SRE),
-  and deploy a working code patch before the system crashes. Built by fusing
-  Aegis (autonomous remediation engine) with Gravex (multi-agent isolated
-  workspace platform). Real-world DevOps automation training benchmark.
+  and deploy a working code patch before the system crashes.
+  Real-world DevOps incident response benchmark.
 
-author: Gravex-Aegis Team
+author: InfraMind Team
 license: MIT
 tags:
   - openenv
