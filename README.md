@@ -1,7 +1,7 @@
 ---
 title: InfraMind Autonomous DevOps Benchmark
 emoji: 🧠
-colorFrom: red
+colorFrom: blue
 colorTo: purple
 sdk: docker
 pinned: true
@@ -22,7 +22,7 @@ tags:
 
 **Autonomous DevOps Benchmark — OpenEnv Multi-Agent Environment**
 
-[![OpenEnv](https://img.shields.io/badge/OpenEnv-Compliant-orange?style=for-the-badge)](https://huggingface.co/spaces)
+[![OpenEnv](https://img.shields.io/badge/OpenEnv-Compliant-4f46e5?style=for-the-badge)](https://huggingface.co/spaces/aakarsh2007/infraMind)
 [![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
@@ -31,7 +31,7 @@ tags:
 
 > **InfraMind evaluates whether AI agents can survive a real on-call incident — not just solve coding puzzles.**
 
-[🎮 Live Demo](https://huggingface.co/spaces/Aakarsh2007/InfraMind) · [⚖️ Judge Mode](https://huggingface.co/spaces/Aakarsh2007/InfraMind/judge/run_all) · [📖 API Docs](https://huggingface.co/spaces/Aakarsh2007/InfraMind/docs)
+[🎮 Live Demo](https://huggingface.co/spaces/aakarsh2007/infraMind) · [⚖️ Judge Mode](https://huggingface.co/spaces/aakarsh2007/infraMind/judge/run_all) · [📖 API Docs](https://huggingface.co/spaces/aakarsh2007/infraMind/docs) · [🏆 Leaderboard](https://huggingface.co/spaces/aakarsh2007/infraMind/leaderboard)
 
 </div>
 
@@ -39,17 +39,19 @@ tags:
 
 ## ⚡ Quick Demo (30 seconds)
 
-**Option 1 — Browser:** Open the Space URL and click "Run Judge Evaluation"
+**Option 1 — Browser:** [Open InfraMind on HF Spaces](https://huggingface.co/spaces/aakarsh2007/infraMind) and click "Run Judge Evaluation"
 
 **Option 2 — curl:**
-
-    curl -X POST https://your-space.hf.space/judge/run_all \
-      -H "Content-Type: application/json" \
-      -d '{"seed": 42}'
+```bash
+curl -X POST https://aakarsh2007-infra-mind.hf.space/judge/run_all \
+  -H "Content-Type: application/json" \
+  -d '{"seed": 42}'
+```
 
 **Option 3 — GET (browser-friendly):**
-
-    https://your-space.hf.space/judge/run_all?seed=42
+```
+https://aakarsh2007-infra-mind.hf.space/judge/run_all?seed=42
+```
 
 **Expected output:**
 
