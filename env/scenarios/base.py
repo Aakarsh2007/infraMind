@@ -206,7 +206,23 @@ class BaseScenario(ABC):
 
         if self.patch_submitted:
             self.done = True
-            reward = self.grade_patch(self._patch_content or "", self._patch_description or "")
+            # Edge-case protection: detect fake/empty patches
+            patch_code = self._patch_content or ""
+            if len(patch_code.strip()) < 20:
+                reward = Reward(
+                    total=0.02,
+                    reason="Patch rejected: too short to be a valid fix (< 20 chars)",
+                    patch_correctness=0.0,
+                    failure_report=FailureReport(
+                        root_cause=self._get_root_cause_label(),
+                        agent_identified_root_cause=False,
+                        final_verdict="failure",
+                        wrong_actions=["Submitted empty or trivially short patch"],
+                        optimal_path=self._get_optimal_path(),
+                    )
+                )
+            else:
+                reward = self.grade_patch(patch_code, self._patch_description or "")
 
             # ── Metric improvement scoring (before/after) ─────────────────
             reward.metric_improvement = self._compute_metric_improvement(new_metrics)
