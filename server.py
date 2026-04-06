@@ -284,6 +284,28 @@ async def judge_run_all(req: JudgeRequest):
             "seed": req.seed,
             "reproducible": True,
             "note": "Run with same seed to reproduce these exact scores",
+            # ── Human-readable summary for judges ────────────────────────
+            "summary": (
+                f"\n{'='*55}\n"
+                f"  INFRA MIND JUDGE EVALUATION  (seed={req.seed})\n"
+                f"{'='*55}\n"
+                f"  Overall Score : {avg*100:.1f}%\n"
+                f"  Grade         : {'S (Excellent)' if avg>=0.9 else 'A (Good)' if avg>=0.7 else 'B (Partial)' if avg>=0.5 else 'C (Weak)' if avg>=0.3 else 'F (Failed)'}\n"
+                f"  Verdict       : {verdict}\n"
+                f"{'─'*55}\n"
+                + "\n".join(f"  {h}" for h in highlights) +
+                f"\n{'─'*55}\n"
+                f"  Diagnostics:\n"
+                f"    Root Cause Accuracy  : {raw['diagnostics'].get('root_cause_accuracy',0)*100:.0f}%\n"
+                f"    Patch Quality        : {raw['diagnostics'].get('patch_quality',0)*100:.0f}%\n"
+                f"    Debugging Efficiency : {raw['diagnostics'].get('debugging_efficiency',0)*100:.0f}%\n"
+                f"{'─'*55}\n"
+                f"  Score Guide:\n"
+                f"    0.9+ → Excellent  (production-ready agent)\n"
+                f"    0.6–0.9 → Good    (partial reliability)\n"
+                f"    <0.6  → Weak      (fails under pressure)\n"
+                f"{'='*55}"
+            ),
         }
     except Exception as e:
         raise HTTPException(500, str(e))
