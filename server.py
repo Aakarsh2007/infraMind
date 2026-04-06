@@ -174,14 +174,8 @@ async def health():
     }
 
 # Root health check — required by HF Spaces ping
-@app.get("/", response_class=HTMLResponse, include_in_schema=False)
-async def root_health():
-    # If UI is built, serve it; otherwise return health JSON
-    _ui_index = os.path.join(os.path.dirname(__file__), "ui", "dist", "index.html")
-    if os.path.isfile(_ui_index):
-        with open(_ui_index) as f:
-            return HTMLResponse(f.read())
-    return HTMLResponse('{"status":"ok","service":"infra-mind"}', media_type="application/json")
+# NOTE: The actual GET / route is defined below in the UI section.
+# This comment is kept for documentation only.
 
 
 # ── OpenEnv Validation Proof ──────────────────────────────────────────────────

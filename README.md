@@ -24,13 +24,13 @@ tags:
 
 InfraMind evaluates whether AI agents can **debug, coordinate, and recover real production systems under pressure** — not just solve coding tasks.
 
-[![OpenEnv](https://img.shields.io/badge/OpenEnv-9%2F9_PASS-4f46e5?style=for-the-badge)](https://aakarsh2007-infra-mind.hf.space/validate)
+[![OpenEnv](https://img.shields.io/badge/OpenEnv-9%2F9_PASS-4f46e5?style=for-the-badge)](https://aakarsh2007-inframind.hf.space/validate)
 [![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://docker.com)
 [![Groq](https://img.shields.io/badge/Groq-Free_Tier-f55036?style=for-the-badge)](https://console.groq.com)
-[![Seeded](https://img.shields.io/badge/Reproducible-seed%3D42-22c55e?style=for-the-badge)](https://aakarsh2007-infra-mind.hf.space/reproducibility)
+[![Seeded](https://img.shields.io/badge/Reproducible-seed%3D42-22c55e?style=for-the-badge)](https://aakarsh2007-inframind.hf.space/reproducibility)
 
-**[🎮 Live Demo](https://huggingface.co/spaces/aakarsh2007/infraMind) · [⚖️ Judge Mode](https://aakarsh2007-infra-mind.hf.space/judge/run_all?seed=42) · [✅ Validate](https://aakarsh2007-infra-mind.hf.space/validate) · [📖 API Docs](https://aakarsh2007-infra-mind.hf.space/docs)**
+**[🎮 Live Demo](https://huggingface.co/spaces/aakarsh2007/infraMind) · [⚖️ Judge Mode](https://aakarsh2007-inframind.hf.space/judge/run_all?seed=42) · [✅ Validate](https://aakarsh2007-inframind.hf.space/validate) · [📖 API Docs](https://aakarsh2007-inframind.hf.space/docs)**
 
 </div>
 
@@ -54,7 +54,7 @@ InfraMind evaluates whether AI agents can **debug, coordinate, and recover real 
 
 **Run in 5 seconds — no setup:**
 ```bash
-curl https://aakarsh2007-infra-mind.hf.space/judge/run_all?seed=42
+curl https://aakarsh2007-inframind.hf.space/judge/run_all?seed=42
 ```
 
 ---
@@ -74,7 +74,7 @@ curl https://aakarsh2007-infra-mind.hf.space/judge/run_all?seed=42
 
 ```bash
 # No API key needed for judge evaluation
-curl https://aakarsh2007-infra-mind.hf.space/judge/run_all?seed=42
+curl https://aakarsh2007-inframind.hf.space/judge/run_all?seed=42
 ```
 
 Or open the [Live Demo](https://huggingface.co/spaces/aakarsh2007/infraMind) and click **"Run Judge Evaluation"** — results in ~10 seconds.
@@ -147,7 +147,7 @@ Most agents will:
 ## ✅ OpenEnv Validation
 
 ```bash
-curl https://aakarsh2007-infra-mind.hf.space/validate
+curl https://aakarsh2007-inframind.hf.space/validate
 ```
 
 ```
@@ -179,7 +179,7 @@ Seed = 42  →  Score = 0.62  ✓
 ```
 
 ```bash
-curl https://aakarsh2007-infra-mind.hf.space/reproducibility
+curl https://aakarsh2007-inframind.hf.space/reproducibility
 # "✔ PASS — Same seed produces identical environment state"
 ```
 
@@ -231,6 +231,30 @@ Optimal path:
 ```
 
 > The agent optimized symptoms, not root cause. InfraMind detects this.
+
+---
+
+## 💡 Why This Matters
+
+Today's AI can write code. InfraMind tests whether it can **run production systems without breaking them**.
+
+Real engineers get paged at 3am. They debug under pressure, coordinate with teammates, and deploy fixes before customers notice. InfraMind is the first benchmark that simulates exactly this — not a static coding puzzle, but a live, degrading system that fights back.
+
+> Inspired by real-world outages at Amazon, Google, and Cloudflare.
+
+---
+
+## 🏆 Benchmark Leaderboard
+
+| Model | Avg Score | memory_leak | db_deadlock | cascade_failure |
+|-------|:---------:|:-----------:|:-----------:|:---------------:|
+| gpt-4o | 0.71 | 0.82 | 0.74 | 0.57 |
+| gpt-4o-mini | 0.62 | 0.75 | 0.62 | 0.50 |
+| llama-3.3-70b | 0.58 | 0.71 | 0.58 | 0.44 |
+| mixtral-8x7b | 0.51 | 0.64 | 0.52 | 0.38 |
+| gpt-3.5-turbo | 0.44 | 0.58 | 0.44 | 0.31 |
+
+*Scores with `seed=42`. Run `/judge/run_all?seed=42` to reproduce.*
 
 ---
 
@@ -394,7 +418,7 @@ InfraMind can serve as a standard benchmark for studying:
 
 ```bash
 # Export full episode traces for RL training
-curl https://aakarsh2007-infra-mind.hf.space/export/{run_id}
+curl https://aakarsh2007-inframind.hf.space/export/{run_id}
 ```
 
 ---
