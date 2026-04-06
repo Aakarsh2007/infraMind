@@ -279,6 +279,22 @@ async def skill_breakdown(run_id: str):
 
 
 # ── Live AI Agent (SSE streaming) ─────────────────────────────────────────────
+
+# Groq-compatible models (use OpenAI client with Groq base URL)
+GROQ_MODELS = {
+    "llama-3.3-70b-versatile", "llama-3.1-8b-instant", "llama3-70b-8192",
+    "llama3-8b-8192", "mixtral-8x7b-32768", "gemma2-9b-it", "gemma-7b-it",
+}
+GROQ_BASE_URL = "https://api.groq.com/openai/v1"
+
+def _build_llm_client(api_key: str, model: str):
+    """Returns (client, model) — auto-detects Groq vs OpenAI based on model name."""
+    from openai import OpenAI as _OAI
+    if model in GROQ_MODELS or model.startswith("llama") or model.startswith("mixtral") or model.startswith("gemma"):
+        return _OAI(api_key=api_key, base_url=GROQ_BASE_URL), model
+    return _OAI(api_key=api_key), model
+
+
 class AgentRunRequest(BaseModel):
     task_id: str = "memory_leak"
     api_key: str
@@ -289,8 +305,7 @@ class AgentRunRequest(BaseModel):
 async def agent_run(req: AgentRunRequest):
     async def stream():
         try:
-            from openai import OpenAI as _OAI
-            client = _OAI(api_key=req.api_key)
+            client, model = _build_llm_client(req.api_key, req.model)
         except Exception as e:
             yield f"data: {json.dumps({'type':'error','message':str(e)})}\n\n"; return
 
@@ -330,7 +345,7 @@ Strategy: list_files → search_logs ERROR → read_file → edit_file → submi
             history.append({"role": "user", "content": "\n".join(parts)})
             try:
                 resp = client.chat.completions.create(
-                    model=req.model,
+                    model=model,
                     messages=[{"role":"system","content":SYSTEM}]+history[-14:],
                     temperature=0.1, max_tokens=500)
                 raw = (resp.choices[0].message.content or "{}").strip()
@@ -366,16 +381,19 @@ Strategy: list_files → search_logs ERROR → read_file → edit_file → submi
 class CompareRequest(BaseModel):
     task_id: str = "memory_leak"
     model_a: str = "gpt-4o-mini"
-    model_b: str = "gpt-4o"
+    model_b: str = "llama-3.3-70b-versatile"
     api_key: str
+    api_key_b: Optional[str] = None  # Optional separate key for model B
     max_steps: int = 15
 
 @app.post("/agent/compare", tags=["Live Agent"], summary="Run two models on same task simultaneously")
 async def agent_compare(req: CompareRequest):
     async def stream():
         try:
-            from openai import OpenAI as _OAI
-            client = _OAI(api_key=req.api_key)
+            client_a, model_a = _build_llm_client(req.api_key, req.model_a)
+            # Use separate key for B if provided (e.g. OpenAI key for A, Groq key for B)
+            key_b = req.api_key_b or req.api_key
+            client_b, model_b = _build_llm_client(key_b, req.model_b)
         except Exception as e:
             yield f"data: {json.dumps({'type':'error','message':str(e)})}\n\n"; return
 
@@ -394,16 +412,16 @@ async def agent_compare(req: CompareRequest):
 
         for step in range(req.max_steps):
             if done_a and done_b: break
-            for side, env, obs, hist, model, done_flag in [
-                ("a", env_a, obs_a, hist_a, req.model_a, done_a),
-                ("b", env_b, obs_b, hist_b, req.model_b, done_b),
+            for side, env, obs, hist, mdl, cli, done_flag in [
+                ("a", env_a, obs_a, hist_a, model_a, client_a, done_a),
+                ("b", env_b, obs_b, hist_b, model_b, client_b, done_b),
             ]:
                 if done_flag: continue
                 m = obs.metrics
                 prompt = f"STEP={obs.step} CPU={m.cpu_percent}% MEM={m.memory_percent}% ERR={m.error_rate*100:.1f}%\nLOGS:\n" + "\n".join(obs.recent_logs[-6:]) + f"\nFILES: {', '.join(obs.available_files)}" + (f"\nRESULT:\n{obs.action_result[:400]}" if obs.action_result else "")
                 hist.append({"role":"user","content":prompt})
                 try:
-                    resp = client.chat.completions.create(model=model, messages=[{"role":"system","content":SYSTEM}]+hist[-10:], temperature=0.1, max_tokens=400)
+                    resp = cli.chat.completions.create(model=mdl, messages=[{"role":"system","content":SYSTEM}]+hist[-10:], temperature=0.1, max_tokens=400)
                     raw = (resp.choices[0].message.content or "{}").strip()
                     hist.append({"role":"assistant","content":raw})
                     if raw.startswith("```"):
@@ -423,7 +441,7 @@ async def agent_compare(req: CompareRequest):
                 else:
                     obs_b = new_obs; done_b = done
                     if done: reward_b = rew.total; steps_b = step+1
-                yield f"data: {json.dumps({'type':'compare_step','side':side,'step':step+1,'model':model,'action_type':ad.get('action_type'),'reasoning':ad.get('reasoning',''),'metrics':new_obs.metrics.model_dump(),'done':done,'reward':rew.total if done else None}, default=str)}\n\n"
+                yield f"data: {json.dumps({'type':'compare_step','side':side,'step':step+1,'model':mdl,'action_type':ad.get('action_type'),'reasoning':ad.get('reasoning',''),'metrics':new_obs.metrics.model_dump(),'done':done,'reward':rew.total if done else None}, default=str)}\n\n"
                 await asyncio.sleep(0.05)
 
         winner = req.model_a if reward_a >= reward_b else req.model_b
