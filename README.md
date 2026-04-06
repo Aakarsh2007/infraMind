@@ -22,34 +22,35 @@ tags:
 
 ### Autonomous DevOps Benchmark for AI Agents
 
+> ⚡ First benchmark where AI agents must debug a **live breaking production system** — not solve static tasks.
+
 **🚨 Can your AI agent survive a real production outage?**
 
 InfraMind evaluates whether agents can debug under pressure, ignore misleading signals, fix root causes (not symptoms), and actually recover system metrics. **Most agents fail.**
 
-[![OpenEnv](https://img.shields.io/badge/OpenEnv-9%2F9_PASS-4f46e5?style=for-the-badge)](https://aakarsh2007-inframind.hf.space/validate)
-[![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
-[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://docker.com)
-[![Groq](https://img.shields.io/badge/Groq-Free_Tier-f55036?style=for-the-badge)](https://console.groq.com)
-[![Seeded](https://img.shields.io/badge/Reproducible-seed%3D42-22c55e?style=for-the-badge)](https://aakarsh2007-inframind.hf.space/reproducibility)
+[![OpenEnv](https://img.shields.io/badge/OpenEnv-9%2F9_PASS-4f46e5?style=flat-square)](https://aakarsh2007-inframind.hf.space/validate)
+[![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=flat-square&logo=docker&logoColor=white)](https://docker.com)
+[![Groq](https://img.shields.io/badge/Groq-Free_Tier-f55036?style=flat-square)](https://console.groq.com)
+[![Seeded](https://img.shields.io/badge/Reproducible-seed%3D42-22c55e?style=flat-square)](https://aakarsh2007-inframind.hf.space/reproducibility)
 
-| Link | URL |
-|------|-----|
-| 🎮 Live Demo (UI) | [huggingface.co/spaces/aakarsh2007/infraMind](https://huggingface.co/spaces/aakarsh2007/infraMind) |
-| ⚖️ Judge Evaluation (API) | [aakarsh2007-inframind.hf.space/judge/run_all?seed=42](https://aakarsh2007-inframind.hf.space/judge/run_all?seed=42) |
-| ✅ OpenEnv Validate (API) | [aakarsh2007-inframind.hf.space/validate](https://aakarsh2007-inframind.hf.space/validate) |
-| 📖 API Docs (Swagger) | [aakarsh2007-inframind.hf.space/docs](https://aakarsh2007-inframind.hf.space/docs) |
-| 🔁 Reproducibility Proof | [aakarsh2007-inframind.hf.space/reproducibility](https://aakarsh2007-inframind.hf.space/reproducibility) |
+---
 
-> **Note:** The UI (`huggingface.co/spaces/...`) and the API (`aakarsh2007-inframind.hf.space/...`) are two different URLs. Use the API URL for all curl commands and direct endpoint access.
+## 🔗 Quick Access
+
+🎮 [Live Demo (UI)](https://huggingface.co/spaces/aakarsh2007/infraMind)
+⚖️ [Run Judge Evaluation](https://aakarsh2007-inframind.hf.space/judge/run_all?seed=42)
+✅ [OpenEnv Validate](https://aakarsh2007-inframind.hf.space/validate)
+📖 [API Docs](https://aakarsh2007-inframind.hf.space/docs)
+🔁 [Reproducibility Proof](https://aakarsh2007-inframind.hf.space/reproducibility)
+
+> **Two URLs:** UI → `huggingface.co/spaces/aakarsh2007/infraMind` · API → `aakarsh2007-inframind.hf.space`
 
 </div>
 
 ---
 
 > **InfraMind is not a benchmark where agents solve problems.**
-> **It is a benchmark where agents survive production.**
-
----> **InfraMind is not a benchmark where agents solve problems.**
 > **It is a benchmark where agents survive production.**
 
 ---
@@ -62,28 +63,30 @@ InfraMind evaluates whether agents can debug under pressure, ignore misleading s
 - Baseline: `gpt-4o-mini` = **0.62** avg
 - ✔ OpenEnv: **9/9 PASS**
 
-**Try it in 10 seconds — no setup, no API key:**
+> No demos. No mocks. No hidden scoring. Everything is verifiable via API.
+
+👉 Try in 10 sec:
 ```bash
 curl https://aakarsh2007-inframind.hf.space/judge/run_all?seed=42
 ```
 
-> No demos. No mocks. No hidden scoring. Everything is verifiable via API.
-
 ---
 
-## 🧭 Evaluate in 2 Minutes
+## 🧭 Evaluate in 2 Minutes (No Setup)
+
+Copy-paste any command:
 
 ```bash
-# 1. Full benchmark score + verdict (no API key needed)
+# Full benchmark score + verdict (no API key needed)
 curl https://aakarsh2007-inframind.hf.space/judge/run_all?seed=42
 
-# 2. OpenEnv compliance proof
+# OpenEnv compliance proof
 curl https://aakarsh2007-inframind.hf.space/validate
 
-# 3. Reproducibility proof
+# Reproducibility proof
 curl https://aakarsh2007-inframind.hf.space/reproducibility
 
-# 4. Interactive API docs
+# Interactive API docs
 open https://aakarsh2007-inframind.hf.space/docs
 ```
 
@@ -135,14 +138,6 @@ curl https://aakarsh2007-inframind.hf.space/judge/run_all?seed=42
 
 ---
 
-## 💡 Why This Matters
-
-AI can write code. InfraMind tests if it can **run production systems without breaking them**.
-
-> Inspired by real-world outages at Amazon, Google, and Cloudflare.
-
----
-
 ## 🚀 Just Try It
 
 ```bash
@@ -180,10 +175,11 @@ Post-mortem: what went wrong, optimal path, causal link
 ```
 
 **Unlike existing benchmarks, InfraMind evaluates:**
+
 - Root cause reasoning (not just code correctness)
 - Multi-agent coordination (5 specialized personas)
 - Real system recovery (metrics actually improve after correct fix)
-- Resilience under adversarial conditions (wrong hints injected)
+- Adversarial robustness (wrong hints injected)
 
 ---
 
@@ -196,7 +192,7 @@ Post-mortem: what went wrong, optimal path, causal link
 - **Fake patches rejected** — patches < 20 chars score 0.02 automatically
 - **Butterfly effect detection** — band-aid fixes trigger worse failures later
 
-> What you see is what the agent actually fixed. You can verify every claim via API endpoints. Nothing is hidden.
+> What you see is what the agent actually fixed. You can verify every claim via API. Nothing is hidden.
 
 ---
 
