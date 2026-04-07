@@ -17,7 +17,12 @@ dependencies = [
     "httpx==0.28.1",
     "openai==1.57.0",
     "python-dotenv==1.0.1",
+    "openenv>=0.1.0",
 ]
+
+[project.scripts]
+server = "server:app"
+infra-mind = "server:app"
 
 [project.urls]
 Homepage = "https://huggingface.co/spaces/aakarsh2007/infraMind"
@@ -31,3 +36,6 @@ build-backend = "setuptools.backends.legacy:build"
 name = "infra-mind"
 version = "1.0.0"
 entry_point = "server:app"
+
+[tool.uv]
+managed = true
