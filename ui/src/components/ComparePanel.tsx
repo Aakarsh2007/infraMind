@@ -9,6 +9,7 @@ interface CompareStep { side: 'a' | 'b'; step: number; model: string; action_typ
 
 export function ComparePanel({ tasks }: Props) {
   const [apiKey, setApiKey] = useState('')
+  const [apiKeyB, setApiKeyB] = useState('')
   const [modelA, setModelA] = useState('gpt-4o-mini')
   const [modelB, setModelB] = useState('llama-3.3-70b-versatile')
   const [taskId, setTaskId] = useState('memory_leak')
@@ -23,11 +24,17 @@ export function ComparePanel({ tasks }: Props) {
   const stopRef = useRef<(() => void) | null>(null)
 
   const start = useCallback(() => {
-    if (!apiKey.trim()) { setError('Enter your OpenAI API key'); return }
+    if (!apiKey.trim()) { setError('Enter API key for Model A'); return }
     setRunning(true); setStepsA([]); setStepsB([]); setMetricsA([]); setMetricsB([]); setResult(null); setError('')
 
     const stop = createCompareStream(
-      { task_id: taskId, model_a: modelA, model_b: modelB, api_key: apiKey, max_steps: maxSteps },
+      {
+        task_id: taskId, model_a: modelA, model_b: modelB,
+        api_key: apiKey,
+        // Use separate key for B if provided (e.g. OpenAI key for A, Groq key for B)
+        ...(apiKeyB.trim() ? { api_key_b: apiKeyB.trim() } : {}),
+        max_steps: maxSteps,
+      },
       (event) => {
         if (event.type === 'compare_step') {
           const s = event as unknown as CompareStep
@@ -48,7 +55,7 @@ export function ComparePanel({ tasks }: Props) {
       () => { setRunning(false) }
     )
     stopRef.current = stop
-  }, [apiKey, modelA, modelB, taskId, maxSteps])
+  }, [apiKey, apiKeyB, modelA, modelB, taskId, maxSteps])
 
   const winner = result ? String(result.winner || '') : null
   const rewardA = result ? Number(result.reward_a || 0) : null
@@ -75,10 +82,20 @@ export function ComparePanel({ tasks }: Props) {
       {/* Config */}
       <div style={{ ...panelStyle, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem', alignItems: 'end' }}>
         <div>
-          <label style={{ fontSize: '0.7rem', color: '#475569', display: 'block', marginBottom: '0.25rem' }}>API Key (OpenAI or Groq)</label>
+          <label style={{ fontSize: '0.7rem', color: '#475569', display: 'block', marginBottom: '0.25rem' }}>
+            API Key — Model A <span style={{ color: '#334155' }}>(required)</span>
+          </label>
           <input type="password" value={apiKey} onChange={e => setApiKey(e.target.value)} placeholder="sk-... or gsk_..."
             style={{ width: '100%', background: '#080c18', border: '1px solid #1e2d4a', borderRadius: '0.4rem', padding: '0.4rem 0.6rem', color: '#e2e8f0', fontSize: '0.8rem', outline: 'none' }} />
-          <div style={{ fontSize: '0.65rem', color: '#334155', marginTop: '0.2rem' }}>One key for both models. Groq models auto-detected.</div>
+          <div style={{ fontSize: '0.62rem', color: '#334155', marginTop: '0.2rem' }}>OpenAI: sk-... · Groq (free): gsk_...</div>
+        </div>
+        <div>
+          <label style={{ fontSize: '0.7rem', color: '#475569', display: 'block', marginBottom: '0.25rem' }}>
+            API Key — Model B <span style={{ color: '#334155' }}>(optional, if different provider)</span>
+          </label>
+          <input type="password" value={apiKeyB} onChange={e => setApiKeyB(e.target.value)} placeholder="Leave blank to use Model A key"
+            style={{ width: '100%', background: '#080c18', border: '1px solid #1e2d4a', borderRadius: '0.4rem', padding: '0.4rem 0.6rem', color: '#e2e8f0', fontSize: '0.8rem', outline: 'none' }} />
+          <div style={{ fontSize: '0.62rem', color: '#334155', marginTop: '0.2rem' }}>Only needed when comparing OpenAI vs Groq</div>
         </div>
         <div>
           <label style={{ fontSize: '0.7rem', color: '#475569', display: 'block', marginBottom: '0.25rem' }}>Model A (OpenAI)</label>

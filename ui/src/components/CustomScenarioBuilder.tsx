@@ -91,9 +91,18 @@ export function CustomScenarioBuilder({ onCreated }: Props) {
         <div>
           <div style={panelStyle}>
             <div style={titleStyle}>🔧 Custom Scenario Builder</div>
-            <p style={{ fontSize: '0.72rem', color: '#475569', marginBottom: '0.75rem', lineHeight: 1.5 }}>
-              Create your own incident scenario. Paste your buggy code and the fixed version — the environment will generate a playable episode from it.
-            </p>
+            <div style={{ background: '#0f1629', border: '1px solid #1e2d4a', borderRadius: '0.5rem', padding: '0.75rem', marginBottom: '0.75rem' }}>
+              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#60a5fa', marginBottom: '0.3rem' }}>How it works</div>
+              <p style={{ fontSize: '0.72rem', color: '#64748b', lineHeight: 1.6, marginBottom: '0.3rem' }}>
+                1. Paste your buggy code and the fixed version below
+              </p>
+              <p style={{ fontSize: '0.72rem', color: '#64748b', lineHeight: 1.6, marginBottom: '0.3rem' }}>
+                2. Click "Create Scenario" — no API key needed
+              </p>
+              <p style={{ fontSize: '0.72rem', color: '#64748b', lineHeight: 1.6 }}>
+                3. Your scenario appears as a new task — play it in <strong style={{ color: '#94a3b8' }}>Colosseum</strong> or <strong style={{ color: '#94a3b8' }}>Live AI</strong>
+              </p>
+            </div>
 
             <label style={labelStyle}>Scenario Name *</label>
             <input value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Stripe Duplicate Charges" style={inputStyle} />
