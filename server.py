@@ -788,3 +788,18 @@ async function runJudge() {
 </body>
 </html>"""
 
+
+
+def main():
+    """Entry point for openenv validate — server:main"""
+    import uvicorn
+    uvicorn.run(
+        "server:app",
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", 7860)),
+        workers=1,
+    )
+
+
+if __name__ == "__main__":
+    main()

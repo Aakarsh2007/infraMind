@@ -21,8 +21,8 @@ dependencies = [
 ]
 
 [project.scripts]
-server = "server:app"
-infra-mind = "server:app"
+server = "server:main"
+infra-mind = "server:main"
 
 [project.urls]
 Homepage = "https://huggingface.co/spaces/aakarsh2007/infraMind"
