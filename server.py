@@ -7,7 +7,7 @@ import asyncio, json, os, sys, time, threading
 from typing import Any, Dict, List, Optional
 sys.path.insert(0, os.path.dirname(__file__))
 
-from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi import Body, Depends, FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
@@ -69,7 +69,10 @@ class StepRequest(BaseModel):
 
 # ── OpenEnv endpoints ─────────────────────────────────────────────────────────
 @app.post("/reset", tags=["OpenEnv"], summary="Reset environment to a new episode")
-async def reset(req: ResetRequest):
+async def reset(req: Optional[ResetRequest] = Body(default=None)):
+    # Accept empty body — validator sends POST /reset with no body
+    if req is None:
+        req = ResetRequest()
     try:
         obs = get_env().reset(task_id=req.task_id, model=req.model or "unknown", seed=req.seed)
         await _broadcast({"event": "reset", "task_id": req.task_id, "seed": obs.seed})
