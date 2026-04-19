@@ -9,6 +9,7 @@ const TABS: Array<{ id: Tab; label: string }> = [
   { id: 'live', label: '🤖 Live AI' },
   { id: 'compare', label: '⚔️ Compare' },
   { id: 'warroom', label: '🚨 War Room' },
+  { id: 'rl', label: '📈 RL Training' },
   { id: 'leaderboard', label: '🏆 Leaderboard' },
   { id: 'custom', label: '🔧 Custom' },
   { id: 'replay', label: '📼 Replay' },

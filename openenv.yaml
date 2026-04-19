@@ -211,6 +211,17 @@ tasks:
       but admin endpoints are being accessed without valid signatures.
       Fix middleware/auth.js with algorithm whitelist.
 
+  - id: k8s_cluster_compromise
+    name: "Task 6 — Super Long-Horizon K8s Compromise"
+    difficulty: hard
+    max_steps: 50
+    reward_range: [0.0, 1.0]
+    description: >
+      A Kubernetes cluster is actively compromised. The agent must trace 
+      an anomalous outbound connection through multiple microservices, 
+      ignore noisy SLA alerts, and patch a zero-day missing signature validation 
+      in the auth-service across an extended 50-step trajectory.
+
 api:
   base_url: http://localhost:7860
   endpoints:

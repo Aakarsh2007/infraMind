@@ -42,13 +42,13 @@ INFRA_ENV_URL = os.getenv("INFRA_ENV_URL") or "http://localhost:7860"
 INFERENCE_SEED = int(os.getenv("INFERENCE_SEED") or "42")
 BENCHMARK = "infra-mind"
 
-# 3 required tasks for baseline; FULL_RUN=1 runs all 5
+# 3 required tasks for baseline; FULL_RUN=1 runs all 6
 TASK_IDS: List[str] = (
-    ["memory_leak", "db_deadlock", "cascade_failure", "cpu_spike", "auth_bypass"]
+    ["memory_leak", "db_deadlock", "cascade_failure", "cpu_spike", "auth_bypass", "k8s_cluster_compromise"]
     if os.getenv("FULL_RUN") == "1"
     else ["memory_leak", "db_deadlock", "cascade_failure"]
 )
-MAX_STEPS_PER_TASK = 20  # keeps runtime well under 20 min
+MAX_STEPS_PER_TASK = 50  # supports super long-horizon tasks
 SUCCESS_SCORE_THRESHOLD = 0.3
 
 # ── OpenAI client — uses API_BASE_URL as LLM endpoint (per hackathon spec) ───

@@ -18,8 +18,9 @@ import { ComparePanel } from './components/ComparePanel'
 import { CustomScenarioBuilder } from './components/CustomScenarioBuilder'
 import { WarRoom } from './components/WarRoom'
 import { ReplayPanel } from './components/ReplayPanel'
+import { RLTrainingPanel } from './components/RLTrainingPanel'
 
-export type Tab = 'colosseum' | 'live' | 'compare' | 'warroom' | 'leaderboard' | 'custom' | 'replay'
+export type Tab = 'colosseum' | 'live' | 'compare' | 'warroom' | 'leaderboard' | 'custom' | 'replay' | 'rl'
 export interface MetricPoint { step: number; cpu: number; mem: number; err: number; latency: number }
 
 export const panelStyle: React.CSSProperties = {
@@ -134,6 +135,7 @@ export default function App() {
       {tab === 'leaderboard' && <Leaderboard />}
       {tab === 'custom' && <CustomScenarioBuilder onCreated={() => { api.tasks().then(r => setTasks(r.tasks)).catch(() => {}) }} />}
       {tab === 'replay' && <ReplayPanel />}
+      {tab === 'rl' && <RLTrainingPanel />}
     </div>
   )
 }

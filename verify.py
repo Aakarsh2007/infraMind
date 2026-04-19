@@ -7,8 +7,8 @@ from env.models import Action, ActionType, AgentRole, FeedbackRequest
 
 env = get_env()
 
-print("Testing all 5 tasks...")
-for tid in ['memory_leak', 'db_deadlock', 'cascade_failure', 'cpu_spike', 'auth_bypass']:
+print("Testing all 6 tasks...")
+for tid in ['memory_leak', 'db_deadlock', 'cascade_failure', 'cpu_spike', 'auth_bypass', 'k8s_cluster_compromise']:
     obs = env.reset(tid, model='test')
     assert obs.task_id == tid and obs.step == 0
 
@@ -37,8 +37,8 @@ print("  feedback: OK")
 print("\nTesting leaderboard + stats...")
 lb = env.leaderboard()
 st = env.stats()
-assert st['total_runs'] == 5
-assert len(lb) == 5
+assert st['total_runs'] == 6
+assert len(lb) == 6
 print(f"  leaderboard: {len(lb)} entries")
 print(f"  stats: avg={st['avg_reward']:.3f}  best={st['best_reward']:.3f}")
 
